@@ -10,11 +10,15 @@ using System.Windows.Forms;
 
 namespace MyQbt
 {
-    public partial class Form1 : Form
+    public partial class InfoForm : Form
     {
-        public Form1()
+        public InfoForm(string title, string info)
         {
             InitializeComponent();
+
+            this.Text = title;
+            this.Icon = Properties.Resources.icon;
+            this.richTextBox.Text = info;
         }
     }
 }
