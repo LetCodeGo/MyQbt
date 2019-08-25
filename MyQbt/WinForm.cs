@@ -25,6 +25,7 @@ namespace MyQbt
             Environment.GetFolderPath(
                 Environment.SpecialFolder.ApplicationData),
             "MyQbt", "MyQbtConfig.xml");
+
         private Config configData;
 
         private bool isManualAddSuccess;
@@ -70,6 +71,7 @@ namespace MyQbt
             InitComboxSaveDisk();
             InitComboxSaveFolder();
             InitComboxDiskFromAndComboxDiskTo();
+            InitComboxSettingSaveFolder();
             CbSaveDiskOrFolder_SelectedIndexChanged(null, null);
 
             if (configData.CategoryList != null)
@@ -181,6 +183,16 @@ namespace MyQbt
                 CbSaveDiskOrFolder_SelectedIndexChanged;
         }
 
+        private void InitComboxSettingSaveFolder()
+        {
+            this.cbSettingSaveFolder.SuspendLayout();
+            this.cbSettingSaveFolder.Items.Clear();
+            this.cbSettingSaveFolder.Items.AddRange(configData.SaveFolderList.ToArray());
+            if (this.cbSettingSaveFolder.Items.Count > 0)
+                this.cbSettingSaveFolder.SelectedIndex = 0;
+            this.cbSettingSaveFolder.ResumeLayout();
+        }
+
         private async void InitComboxCategory()
         {
             this.cbCategory.SuspendLayout();
@@ -262,7 +274,7 @@ namespace MyQbt
                     strTemp = strTemp.Replace(kv.Key, kv.Value);
                 }
             }
-            this.tbSaveFolder.Text = strTemp;
+            this.cbSettingSaveFolder.Text = strTemp;
         }
 
         private async void BtnLogin_Click(object sender, EventArgs e)
@@ -321,11 +333,11 @@ namespace MyQbt
 
         private async void BtnAddTorrent_Click(object sender, EventArgs e)
         {
-            string settingSaveFolder = this.tbSaveFolder.Text;
+            string settingSaveFolder = this.cbSettingSaveFolder.Text;
             string category = this.cbCategory.Text.Trim();
 
             if (!Helper.CheckPath(ref settingSaveFolder)) return;
-            else this.tbSaveFolder.Text = settingSaveFolder;
+            else this.cbSettingSaveFolder.Text = settingSaveFolder;
 
             OpenFileDialog dlg = new OpenFileDialog
             {
@@ -348,8 +360,10 @@ namespace MyQbt
                         {
                             await AddPrefixWithFileName.AddTorrent(
                                 torrentPath, settingSaveFolder,
+                                this.cbSkipHashCheck.Checked,
                                 this.cbStartTorrent.Checked, category);
                             successList.Add(torrentPath);
+                            UpdataComboxSettingSaveFolder(settingSaveFolder);
                         }
                         catch (Exception ex)
                         {
@@ -363,13 +377,18 @@ namespace MyQbt
                     {
                         AddTorrentManual form = new AddTorrentManual(
                             torrentPath, settingSaveFolder,
+                            this.cbSkipHashCheck.Checked,
                             this.cbStartTorrent.Checked, category)
                         {
                             UpdataResultAndReason = this.UpdataManualAddResultAddReason
                         };
                         form.ShowDialog();
 
-                        if (this.isManualAddSuccess) successList.Add(torrentPath);
+                        if (this.isManualAddSuccess)
+                        {
+                            successList.Add(torrentPath);
+                            UpdataComboxSettingSaveFolder(settingSaveFolder);
+                        }
                         else failedDic.Add(torrentPath, this.manualAddFailedReason);
                     }
                 }
@@ -380,9 +399,10 @@ namespace MyQbt
                         await QbtWebAPI.API.DownloadFromDisk(
                             dlg.FileNames.ToList(), settingSaveFolder,
                             null, string.IsNullOrWhiteSpace(category) ? null : category,
-                            null, !this.cbStartTorrent.Checked,
+                            this.cbSkipHashCheck.Checked, !this.cbStartTorrent.Checked,
                             true, null, null, null, null, null);
                         successList.AddRange(dlg.FileNames);
+                        UpdataComboxSettingSaveFolder(settingSaveFolder);
                     }
                     catch (Exception ex)
                     {
@@ -413,6 +433,16 @@ namespace MyQbt
                 InfoForm infoForm = new InfoForm("Add Torrents Log", strLog);
                 infoForm.ShowDialog();
             }
+        }
+
+        private void UpdataComboxSettingSaveFolder(string settingSaveFolder)
+        {
+            configData.SaveFolderList.Remove(settingSaveFolder);
+            configData.SaveFolderList.Insert(0, settingSaveFolder);
+            if (configData.SaveFolderList.Count > 30)
+                configData.SaveFolderList.RemoveRange(
+                    30, configData.SaveFolderList.Count - 30);
+            InitComboxSettingSaveFolder();
         }
 
         private void UpdataManualAddResultAddReason(

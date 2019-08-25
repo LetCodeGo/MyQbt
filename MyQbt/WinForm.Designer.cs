@@ -43,7 +43,7 @@
             this.btnAddTorrent = new System.Windows.Forms.Button();
             this.groupBoxAddSaveFolder = new System.Windows.Forms.GroupBox();
             this.cbDiskMap = new System.Windows.Forms.CheckBox();
-            this.tbSaveFolder = new System.Windows.Forms.TextBox();
+            this.cbSettingSaveFolder = new System.Windows.Forms.ComboBox();
             this.cbSaveFolder = new System.Windows.Forms.ComboBox();
             this.cbSaveDisk = new System.Windows.Forms.ComboBox();
             this.groupBoxAddType = new System.Windows.Forms.GroupBox();
@@ -67,6 +67,7 @@
             this.btnDiskChange = new System.Windows.Forms.Button();
             this.cbDiskTo = new System.Windows.Forms.ComboBox();
             this.cbDiskFrom = new System.Windows.Forms.ComboBox();
+            this.cbSkipHashCheck = new System.Windows.Forms.CheckBox();
             this.tabControl.SuspendLayout();
             this.tabPageOnline.SuspendLayout();
             this.groupBoxDiskMap.SuspendLayout();
@@ -169,6 +170,7 @@
             // 
             // groupBoxAdd
             // 
+            this.groupBoxAdd.Controls.Add(this.cbSkipHashCheck);
             this.groupBoxAdd.Controls.Add(this.cbCategory);
             this.groupBoxAdd.Controls.Add(this.label3);
             this.groupBoxAdd.Controls.Add(this.cbStartTorrent);
@@ -185,15 +187,15 @@
             // cbCategory
             // 
             this.cbCategory.FormattingEnabled = true;
-            this.cbCategory.Location = new System.Drawing.Point(190, 180);
+            this.cbCategory.Location = new System.Drawing.Point(72, 199);
             this.cbCategory.Name = "cbCategory";
-            this.cbCategory.Size = new System.Drawing.Size(215, 20);
+            this.cbCategory.Size = new System.Drawing.Size(349, 20);
             this.cbCategory.TabIndex = 7;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(128, 185);
+            this.label3.Location = new System.Drawing.Point(10, 204);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(65, 12);
             this.label3.TabIndex = 6;
@@ -202,7 +204,7 @@
             // cbStartTorrent
             // 
             this.cbStartTorrent.AutoSize = true;
-            this.cbStartTorrent.Location = new System.Drawing.Point(12, 184);
+            this.cbStartTorrent.Location = new System.Drawing.Point(319, 177);
             this.cbStartTorrent.Name = "cbStartTorrent";
             this.cbStartTorrent.Size = new System.Drawing.Size(102, 16);
             this.cbStartTorrent.TabIndex = 5;
@@ -211,9 +213,9 @@
             // 
             // btnAddTorrent
             // 
-            this.btnAddTorrent.Location = new System.Drawing.Point(419, 179);
+            this.btnAddTorrent.Location = new System.Drawing.Point(12, 225);
             this.btnAddTorrent.Name = "btnAddTorrent";
-            this.btnAddTorrent.Size = new System.Drawing.Size(75, 23);
+            this.btnAddTorrent.Size = new System.Drawing.Size(409, 23);
             this.btnAddTorrent.TabIndex = 4;
             this.btnAddTorrent.Text = "添加";
             this.btnAddTorrent.UseVisualStyleBackColor = true;
@@ -222,7 +224,7 @@
             // groupBoxAddSaveFolder
             // 
             this.groupBoxAddSaveFolder.Controls.Add(this.cbDiskMap);
-            this.groupBoxAddSaveFolder.Controls.Add(this.tbSaveFolder);
+            this.groupBoxAddSaveFolder.Controls.Add(this.cbSettingSaveFolder);
             this.groupBoxAddSaveFolder.Controls.Add(this.cbSaveFolder);
             this.groupBoxAddSaveFolder.Controls.Add(this.cbSaveDisk);
             this.groupBoxAddSaveFolder.Location = new System.Drawing.Point(6, 74);
@@ -244,12 +246,12 @@
             this.cbDiskMap.Text = "磁盘映射(网络磁盘名映射为实际磁盘名)";
             this.cbDiskMap.UseVisualStyleBackColor = true;
             // 
-            // tbSaveFolder
+            // cbSettingSaveFolder
             // 
-            this.tbSaveFolder.Location = new System.Drawing.Point(6, 68);
-            this.tbSaveFolder.Name = "tbSaveFolder";
-            this.tbSaveFolder.Size = new System.Drawing.Size(476, 21);
-            this.tbSaveFolder.TabIndex = 2;
+            this.cbSettingSaveFolder.Location = new System.Drawing.Point(6, 68);
+            this.cbSettingSaveFolder.Name = "cbSettingSaveFolder";
+            this.cbSettingSaveFolder.Size = new System.Drawing.Size(476, 21);
+            this.cbSettingSaveFolder.TabIndex = 2;
             // 
             // cbSaveFolder
             // 
@@ -495,6 +497,16 @@
             this.cbDiskFrom.Size = new System.Drawing.Size(60, 20);
             this.cbDiskFrom.TabIndex = 0;
             // 
+            // cbSkipHashCheck
+            // 
+            this.cbSkipHashCheck.AutoSize = true;
+            this.cbSkipHashCheck.Location = new System.Drawing.Point(12, 177);
+            this.cbSkipHashCheck.Name = "cbSkipHashCheck";
+            this.cbSkipHashCheck.Size = new System.Drawing.Size(288, 16);
+            this.cbSkipHashCheck.TabIndex = 8;
+            this.cbSkipHashCheck.Text = "Skip Hask Check (Checked Only On File Exist)";
+            this.cbSkipHashCheck.UseVisualStyleBackColor = true;
+            // 
             // WinForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -547,7 +559,7 @@
         private System.Windows.Forms.RadioButton rbAddPrefixWithFileName;
         private System.Windows.Forms.GroupBox groupBoxLogin;
         private System.Windows.Forms.Button btnAddTorrent;
-        private System.Windows.Forms.TextBox tbSaveFolder;
+        private System.Windows.Forms.ComboBox cbSettingSaveFolder;
         private System.Windows.Forms.GroupBox groupBoxModifyDisk;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnDiskChange;
@@ -569,6 +581,7 @@
         private System.Windows.Forms.ComboBox cbCategory;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.CheckBox cbKeepConnectSetting;
+        private System.Windows.Forms.CheckBox cbSkipHashCheck;
     }
 }
 

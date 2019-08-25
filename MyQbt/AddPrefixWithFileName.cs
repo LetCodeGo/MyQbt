@@ -57,7 +57,7 @@ namespace MyQbt
         }
 
         public static async Task AddTorrent(
-            string torrentPath, string saveFolder,
+            string torrentPath, string saveFolder, bool skipHashCheck,
             bool startTorrent, string category)
         {
             var bencodeParser =
@@ -81,7 +81,7 @@ namespace MyQbt
                     await QbtWebAPI.API.DownloadFromDisk(
                         new List<string>() { torrentPath }, savePath,
                         null, string.IsNullOrWhiteSpace(category) ? null : category,
-                        null, !startTorrent, false, strTitle, null, null, null, null);
+                        skipHashCheck, !startTorrent, false, strTitle, null, null, null, null);
                 }
                 else throw new Exception("保存路径包含无效字符");
             }

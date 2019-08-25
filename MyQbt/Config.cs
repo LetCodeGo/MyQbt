@@ -31,6 +31,9 @@ namespace MyQbt
         [XmlArray("CategoryList")]
         public List<string> CategoryList;
 
+        [XmlArray("SaveFolderList")]
+        public List<string> SaveFolderList;
+
         [XmlElement("DiskMapString")]
         public string DiskMapString;
     }

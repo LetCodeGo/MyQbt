@@ -162,6 +162,7 @@ namespace MyQbt
         public AddTorrentManual(
             string torrentPath,
             string settingSaveFolder,
+            bool skipHashCheck,
             bool startTorrent,
             string category)
         {
@@ -172,6 +173,7 @@ namespace MyQbt
 
             this.torrentPath = torrentPath;
             this.settingSaveFolder = settingSaveFolder;
+            this.cbSkipHashCheck.Checked = skipHashCheck;
             this.cbStartTorrent.Checked = startTorrent;
             this.defaultCategory = category;
         }
@@ -444,7 +446,8 @@ namespace MyQbt
 
         private void AddTorrentManual_FormClosed(object sender, FormClosedEventArgs e)
         {
-            this.UpdataResultAndReason?.Invoke(this.isAddTorrentSuccess, this.failedReason);
+            this.UpdataResultAndReason?.Invoke(
+                this.isAddTorrentSuccess, this.failedReason);
         }
     }
 }
