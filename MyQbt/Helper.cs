@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -180,6 +181,55 @@ namespace MyQbt
                 byte[] decryptData = rsa.Decrypt(encryptData, false);
                 return Encoding.Default.GetString(decryptData);
             }
+        }
+
+        public static string GetLoaclPath(string path,
+            Dictionary<string, string> diskMapDic)
+        {
+            if (diskMapDic == null) return path;
+            string strTemp = path.ToLower();
+
+            foreach (KeyValuePair<string, string> kv in diskMapDic)
+            {
+                int index = strTemp.IndexOf(kv.Value.ToLower());
+                if (index == 0)
+                {
+                    return kv.Key + strTemp.Substring(kv.Value.Length);
+                }
+            }
+
+            return path;
+        }
+
+        public static bool CanSkipCheck(
+            BencodeNET.Torrents.Torrent torrent,
+            string localSaveFolder)
+        {
+            if (torrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Unknown) return false;
+            else if (torrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single)
+            {
+                string filePath = Path.Combine(localSaveFolder, torrent.File.FileName);
+                if (File.Exists(filePath))
+                {
+                    FileInfo fi = new FileInfo(filePath);
+                    if (fi.Length != torrent.File.FileSize) return false;
+                }
+                else return false;
+            }
+            else
+            {
+                foreach (var v in torrent.Files)
+                {
+                    string filePath = Path.Combine(localSaveFolder, v.FullPath);
+                    if (File.Exists(filePath))
+                    {
+                        FileInfo fi = new FileInfo(filePath);
+                        if (fi.Length != v.FileSize) return false;
+                    }
+                    else return false;
+                }
+            }
+            return true;
         }
     }
 }

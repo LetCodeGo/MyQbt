@@ -79,6 +79,12 @@
     <Compile Include="WinForm.Designer.cs">
       <DependentUpon>WinForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="µTorrentOfflineUserControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="µTorrentOfflineUserControl.Designer.cs">
+      <DependentUpon>µTorrentOfflineUserControl.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="AddTorrentManual.resx">
       <DependentUpon>AddTorrentManual.cs</DependentUpon>
     </EmbeddedResource>
@@ -97,6 +103,9 @@
     </Compile>
     <EmbeddedResource Include="WinForm.resx">
       <DependentUpon>WinForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="µTorrentOfflineUserControl.resx">
+      <DependentUpon>µTorrentOfflineUserControl.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

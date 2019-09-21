@@ -33,10 +33,11 @@
             this.tbPassword = new System.Windows.Forms.TextBox();
             this.btnLogin = new System.Windows.Forms.Button();
             this.tabControl = new System.Windows.Forms.TabControl();
-            this.tabPageOnline = new System.Windows.Forms.TabPage();
+            this.tabPageqBittorrentOnline = new System.Windows.Forms.TabPage();
             this.groupBoxDiskMap = new System.Windows.Forms.GroupBox();
             this.rtbDiskMap = new System.Windows.Forms.RichTextBox();
             this.groupBoxAdd = new System.Windows.Forms.GroupBox();
+            this.cbSkipHashCheck = new System.Windows.Forms.CheckBox();
             this.cbCategory = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.cbStartTorrent = new System.Windows.Forms.CheckBox();
@@ -52,9 +53,10 @@
             this.rbAddPrefixWithFileName = new System.Windows.Forms.RadioButton();
             this.groupBoxLogin = new System.Windows.Forms.GroupBox();
             this.cbKeepConnectSetting = new System.Windows.Forms.CheckBox();
-            this.tabPageOffline = new System.Windows.Forms.TabPage();
+            this.tabPageqBittorrentOffline = new System.Windows.Forms.TabPage();
             this.groupBoxModifyOther = new System.Windows.Forms.GroupBox();
             this.btnRemoveNotExistDataFileTorrent = new System.Windows.Forms.Button();
+            this.buttonOther = new System.Windows.Forms.Button();
             this.groupBoxTrackers = new System.Windows.Forms.GroupBox();
             this.cbFindCategory = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -67,15 +69,15 @@
             this.btnDiskChange = new System.Windows.Forms.Button();
             this.cbDiskTo = new System.Windows.Forms.ComboBox();
             this.cbDiskFrom = new System.Windows.Forms.ComboBox();
-            this.cbSkipHashCheck = new System.Windows.Forms.CheckBox();
+            this.tabPageµTorrentOffline = new System.Windows.Forms.TabPage();
             this.tabControl.SuspendLayout();
-            this.tabPageOnline.SuspendLayout();
+            this.tabPageqBittorrentOnline.SuspendLayout();
             this.groupBoxDiskMap.SuspendLayout();
             this.groupBoxAdd.SuspendLayout();
             this.groupBoxAddSaveFolder.SuspendLayout();
             this.groupBoxAddType.SuspendLayout();
             this.groupBoxLogin.SuspendLayout();
-            this.tabPageOffline.SuspendLayout();
+            this.tabPageqBittorrentOffline.SuspendLayout();
             this.groupBoxModifyOther.SuspendLayout();
             this.groupBoxTrackers.SuspendLayout();
             this.groupBoxModifyDisk.SuspendLayout();
@@ -126,8 +128,9 @@
             // 
             // tabControl
             // 
-            this.tabControl.Controls.Add(this.tabPageOnline);
-            this.tabControl.Controls.Add(this.tabPageOffline);
+            this.tabControl.Controls.Add(this.tabPageqBittorrentOnline);
+            this.tabControl.Controls.Add(this.tabPageqBittorrentOffline);
+            this.tabControl.Controls.Add(this.tabPageµTorrentOffline);
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Name = "tabControl";
@@ -135,18 +138,18 @@
             this.tabControl.Size = new System.Drawing.Size(800, 450);
             this.tabControl.TabIndex = 4;
             // 
-            // tabPageOnline
+            // tabPageqBittorrentOnline
             // 
-            this.tabPageOnline.Controls.Add(this.groupBoxDiskMap);
-            this.tabPageOnline.Controls.Add(this.groupBoxAdd);
-            this.tabPageOnline.Controls.Add(this.groupBoxLogin);
-            this.tabPageOnline.Location = new System.Drawing.Point(4, 22);
-            this.tabPageOnline.Name = "tabPageOnline";
-            this.tabPageOnline.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageOnline.Size = new System.Drawing.Size(792, 424);
-            this.tabPageOnline.TabIndex = 0;
-            this.tabPageOnline.Text = "在线";
-            this.tabPageOnline.UseVisualStyleBackColor = true;
+            this.tabPageqBittorrentOnline.Controls.Add(this.groupBoxDiskMap);
+            this.tabPageqBittorrentOnline.Controls.Add(this.groupBoxAdd);
+            this.tabPageqBittorrentOnline.Controls.Add(this.groupBoxLogin);
+            this.tabPageqBittorrentOnline.Location = new System.Drawing.Point(4, 22);
+            this.tabPageqBittorrentOnline.Name = "tabPageqBittorrentOnline";
+            this.tabPageqBittorrentOnline.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageqBittorrentOnline.Size = new System.Drawing.Size(792, 424);
+            this.tabPageqBittorrentOnline.TabIndex = 0;
+            this.tabPageqBittorrentOnline.Text = "qBittorrent 在线";
+            this.tabPageqBittorrentOnline.UseVisualStyleBackColor = true;
             // 
             // groupBoxDiskMap
             // 
@@ -183,6 +186,16 @@
             this.groupBoxAdd.TabIndex = 5;
             this.groupBoxAdd.TabStop = false;
             this.groupBoxAdd.Text = "添加种子";
+            // 
+            // cbSkipHashCheck
+            // 
+            this.cbSkipHashCheck.AutoSize = true;
+            this.cbSkipHashCheck.Location = new System.Drawing.Point(12, 177);
+            this.cbSkipHashCheck.Name = "cbSkipHashCheck";
+            this.cbSkipHashCheck.Size = new System.Drawing.Size(288, 16);
+            this.cbSkipHashCheck.TabIndex = 8;
+            this.cbSkipHashCheck.Text = "Skip Hask Check (Checked Only On File Exist)";
+            this.cbSkipHashCheck.UseVisualStyleBackColor = true;
             // 
             // cbCategory
             // 
@@ -250,7 +263,7 @@
             // 
             this.cbSettingSaveFolder.Location = new System.Drawing.Point(6, 68);
             this.cbSettingSaveFolder.Name = "cbSettingSaveFolder";
-            this.cbSettingSaveFolder.Size = new System.Drawing.Size(476, 21);
+            this.cbSettingSaveFolder.Size = new System.Drawing.Size(476, 20);
             this.cbSettingSaveFolder.TabIndex = 2;
             // 
             // cbSaveFolder
@@ -341,22 +354,23 @@
             this.cbKeepConnectSetting.Text = "保存连接设置";
             this.cbKeepConnectSetting.UseVisualStyleBackColor = true;
             // 
-            // tabPageOffline
+            // tabPageqBittorrentOffline
             // 
-            this.tabPageOffline.Controls.Add(this.groupBoxModifyOther);
-            this.tabPageOffline.Controls.Add(this.groupBoxTrackers);
-            this.tabPageOffline.Controls.Add(this.groupBoxModifyDisk);
-            this.tabPageOffline.Location = new System.Drawing.Point(4, 22);
-            this.tabPageOffline.Name = "tabPageOffline";
-            this.tabPageOffline.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageOffline.Size = new System.Drawing.Size(792, 424);
-            this.tabPageOffline.TabIndex = 1;
-            this.tabPageOffline.Text = "离线";
-            this.tabPageOffline.UseVisualStyleBackColor = true;
+            this.tabPageqBittorrentOffline.Controls.Add(this.groupBoxModifyOther);
+            this.tabPageqBittorrentOffline.Controls.Add(this.groupBoxTrackers);
+            this.tabPageqBittorrentOffline.Controls.Add(this.groupBoxModifyDisk);
+            this.tabPageqBittorrentOffline.Location = new System.Drawing.Point(4, 22);
+            this.tabPageqBittorrentOffline.Name = "tabPageqBittorrentOffline";
+            this.tabPageqBittorrentOffline.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageqBittorrentOffline.Size = new System.Drawing.Size(792, 424);
+            this.tabPageqBittorrentOffline.TabIndex = 1;
+            this.tabPageqBittorrentOffline.Text = "qBittorrent 离线";
+            this.tabPageqBittorrentOffline.UseVisualStyleBackColor = true;
             // 
             // groupBoxModifyOther
             // 
             this.groupBoxModifyOther.Controls.Add(this.btnRemoveNotExistDataFileTorrent);
+            this.groupBoxModifyOther.Controls.Add(this.buttonOther);
             this.groupBoxModifyOther.Location = new System.Drawing.Point(180, 159);
             this.groupBoxModifyOther.Name = "groupBoxModifyOther";
             this.groupBoxModifyOther.Size = new System.Drawing.Size(300, 107);
@@ -373,6 +387,16 @@
             this.btnRemoveNotExistDataFileTorrent.Text = "移除实际数据不存在的种子";
             this.btnRemoveNotExistDataFileTorrent.UseVisualStyleBackColor = true;
             this.btnRemoveNotExistDataFileTorrent.Click += new System.EventHandler(this.BtnRemoveNotExistDataFileTorrent_Click);
+            // 
+            // buttonOther
+            // 
+            this.buttonOther.Location = new System.Drawing.Point(6, 72);
+            this.buttonOther.Name = "buttonOther";
+            this.buttonOther.Size = new System.Drawing.Size(288, 23);
+            this.buttonOther.TabIndex = 0;
+            this.buttonOther.Text = "其他";
+            this.buttonOther.UseVisualStyleBackColor = true;
+            this.buttonOther.Click += new System.EventHandler(this.ButtonOther_Click);
             // 
             // groupBoxTrackers
             // 
@@ -497,15 +521,14 @@
             this.cbDiskFrom.Size = new System.Drawing.Size(60, 20);
             this.cbDiskFrom.TabIndex = 0;
             // 
-            // cbSkipHashCheck
+            // tabPageµTorrentOffline
             // 
-            this.cbSkipHashCheck.AutoSize = true;
-            this.cbSkipHashCheck.Location = new System.Drawing.Point(12, 177);
-            this.cbSkipHashCheck.Name = "cbSkipHashCheck";
-            this.cbSkipHashCheck.Size = new System.Drawing.Size(288, 16);
-            this.cbSkipHashCheck.TabIndex = 8;
-            this.cbSkipHashCheck.Text = "Skip Hask Check (Checked Only On File Exist)";
-            this.cbSkipHashCheck.UseVisualStyleBackColor = true;
+            this.tabPageµTorrentOffline.Location = new System.Drawing.Point(4, 22);
+            this.tabPageµTorrentOffline.Name = "tabPageµTorrentOffline";
+            this.tabPageµTorrentOffline.Size = new System.Drawing.Size(792, 424);
+            this.tabPageµTorrentOffline.TabIndex = 2;
+            this.tabPageµTorrentOffline.Text = "µTorrent 离线";
+            this.tabPageµTorrentOffline.UseVisualStyleBackColor = true;
             // 
             // WinForm
             // 
@@ -517,10 +540,11 @@
             this.Name = "WinForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MainForm";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.WinForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.WinForm_FormClosed);
             this.Load += new System.EventHandler(this.WinForm_Load);
             this.tabControl.ResumeLayout(false);
-            this.tabPageOnline.ResumeLayout(false);
+            this.tabPageqBittorrentOnline.ResumeLayout(false);
             this.groupBoxDiskMap.ResumeLayout(false);
             this.groupBoxAdd.ResumeLayout(false);
             this.groupBoxAdd.PerformLayout();
@@ -530,7 +554,7 @@
             this.groupBoxAddType.PerformLayout();
             this.groupBoxLogin.ResumeLayout(false);
             this.groupBoxLogin.PerformLayout();
-            this.tabPageOffline.ResumeLayout(false);
+            this.tabPageqBittorrentOffline.ResumeLayout(false);
             this.groupBoxModifyOther.ResumeLayout(false);
             this.groupBoxTrackers.ResumeLayout(false);
             this.groupBoxTrackers.PerformLayout();
@@ -547,8 +571,8 @@
         private System.Windows.Forms.TextBox tbPassword;
         private System.Windows.Forms.Button btnLogin;
         private System.Windows.Forms.TabControl tabControl;
-        private System.Windows.Forms.TabPage tabPageOnline;
-        private System.Windows.Forms.TabPage tabPageOffline;
+        private System.Windows.Forms.TabPage tabPageqBittorrentOnline;
+        private System.Windows.Forms.TabPage tabPageqBittorrentOffline;
         private System.Windows.Forms.GroupBox groupBoxAdd;
         private System.Windows.Forms.GroupBox groupBoxAddSaveFolder;
         private System.Windows.Forms.ComboBox cbSaveFolder;
@@ -582,6 +606,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.CheckBox cbKeepConnectSetting;
         private System.Windows.Forms.CheckBox cbSkipHashCheck;
+        private System.Windows.Forms.Button buttonOther;
+        private System.Windows.Forms.TabPage tabPageµTorrentOffline;
     }
 }
 

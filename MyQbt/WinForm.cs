@@ -22,14 +22,14 @@ namespace MyQbt
                 "qBittorrent", "BT_backup");
 
         private static readonly string configPath = Path.Combine(
-            Environment.GetFolderPath(
-                Environment.SpecialFolder.ApplicationData),
-            "MyQbt", "MyQbtConfig.xml");
+            AppDomain.CurrentDomain.BaseDirectory, "MyQbtConfig.xml");
 
         private Config configData;
 
         private bool isManualAddSuccess;
         private string manualAddFailedReason;
+
+        private Func<bool> CheckµTorrentNeedSave = null;
 
         public WinForm()
         {
@@ -89,6 +89,16 @@ namespace MyQbt
 
             this.cbTrackerFind.SelectedIndex = 0;
             this.cbTrackerReplace.SelectedIndex = 0;
+
+            µTorrentOfflineUserControl utc = new µTorrentOfflineUserControl();
+            utc.Dock = DockStyle.Fill;
+            this.CheckµTorrentNeedSave = utc.CheckNeedSaveWhenFormClosing;
+            this.tabPageµTorrentOffline.Controls.Add(utc);
+        }
+
+        private void WinForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = this.CheckµTorrentNeedSave();
         }
 
         private void WinForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -224,13 +234,15 @@ namespace MyQbt
         private Dictionary<string, string> GetDiskMap()
         {
             string[] strMaps = this.rtbDiskMap.Text.ToUpper().Split(
-                new char[] { '\r', '\n', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             Dictionary<string, string> diskMapDic = new Dictionary<string, string>();
 
             foreach (string strMap in strMaps)
             {
                 string[] ss = strMap.Split(
-                    new char[] { '|', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+                if (ss == null) continue;
+                for (int i = 0; i < ss.Length; i++) ss[i] = ss[i].Trim();
                 if (ss.Length == 2 && ss[0].EndsWith("\\") && ss[1].EndsWith("\\"))
                 {
                     if (diskMapDic.ContainsKey(ss[0]))
@@ -347,6 +359,7 @@ namespace MyQbt
 
             if (dlg.ShowDialog() == DialogResult.OK)
             {
+                Dictionary<string, string> diskMapDic = GetDiskMap();
                 string strLog = "";
 
                 List<string> successList = new List<string>();
@@ -396,11 +409,36 @@ namespace MyQbt
                 {
                     try
                     {
-                        await QbtWebAPI.API.DownloadFromDisk(
-                            dlg.FileNames.ToList(), settingSaveFolder,
-                            null, string.IsNullOrWhiteSpace(category) ? null : category,
-                            this.cbSkipHashCheck.Checked, !this.cbStartTorrent.Checked,
-                            true, null, null, null, null, null);
+                        if (this.cbSkipHashCheck.Checked)
+                        {
+                            foreach (string torrentPath in dlg.FileNames)
+                            {
+                                var bencodeParser =
+                                    new BencodeNET.Parsing.BencodeParser();
+                                var bencodeTorrent =
+                                    bencodeParser.Parse<BencodeNET.Torrents.Torrent>(torrentPath);
+
+                                if (Helper.CanSkipCheck(bencodeTorrent,
+                                    Helper.GetLoaclPath(settingSaveFolder, diskMapDic)))
+                                {
+                                    await QbtWebAPI.API.DownloadFromDisk(
+                                        new List<string>() { torrentPath }, settingSaveFolder,
+                                        null, string.IsNullOrWhiteSpace(category) ? null : category,
+                                        this.cbSkipHashCheck.Checked, !this.cbStartTorrent.Checked,
+                                        true, null, null, null, null, null);
+                                    successList.Add(torrentPath);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            await QbtWebAPI.API.DownloadFromDisk(
+                                dlg.FileNames.ToList(), settingSaveFolder,
+                                null, string.IsNullOrWhiteSpace(category) ? null : category,
+                                this.cbSkipHashCheck.Checked, !this.cbStartTorrent.Checked,
+                                true, null, null, null, null, null);
+                        }
+
                         successList.AddRange(dlg.FileNames);
                         UpdataComboxSettingSaveFolder(settingSaveFolder);
                     }
@@ -695,6 +733,54 @@ namespace MyQbt
             InfoForm form = new InfoForm(
                 "Remove Torrent Whose Data File Not Exist Log", strLog);
             form.ShowDialog();
+        }
+
+        private void ButtonOther_Click(object sender, EventArgs e)
+        {
+            RemoveAllCategoryTorrents();
+        }
+
+        private void RemoveAllCategoryTorrents()
+        {
+            string[] categorys = new string[] {
+                "DicMusic", "OpenCD", "Orpheus", "Redacted" };
+
+            string actionDirectory = GetActionDirectory();
+            if (actionDirectory == null) return;
+
+            string[] fastresumeFiles = Directory.GetFiles(
+                actionDirectory, "*.fastresume", SearchOption.AllDirectories);
+
+            var parser = new BencodeNET.Parsing.BencodeParser();
+            BencodeNET.Objects.BString categoryBString =
+                new BencodeNET.Objects.BString("qBt-category");
+            BencodeNET.Objects.BString ctBString =
+                new BencodeNET.Objects.BString("completed_time");
+
+            string strTime = DateTime.Now.ToString("yyyyMMddhhmmss");
+
+            foreach (string fastresumeFile in fastresumeFiles)
+            {
+                var bdic = parser.Parse<BencodeNET.Objects.BDictionary>(fastresumeFile);
+
+                if (bdic[ctBString].ToString() == "0") continue;
+
+                string category = bdic[categoryBString].ToString();
+                if (Array.IndexOf(categorys, category) == -1) continue;
+
+                string categoryFolder = Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory, strTime, category);
+                Directory.CreateDirectory(categoryFolder);
+
+                string torrentFile = fastresumeFile.Replace(".fastresume", ".torrent");
+
+                File.Move(fastresumeFile, Path.Combine(
+                    categoryFolder, Path.GetFileName(fastresumeFile)));
+                File.Move(torrentFile, Path.Combine(
+                    categoryFolder, Path.GetFileName(torrentFile)));
+            }
+
+            MessageBox.Show("移动完成");
         }
     }
 }
