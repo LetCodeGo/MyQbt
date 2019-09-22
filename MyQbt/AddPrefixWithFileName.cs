@@ -58,7 +58,8 @@ namespace MyQbt
 
         public static async Task AddTorrent(
             string torrentPath, string saveFolder, bool skipHashCheck,
-            bool startTorrent, string category)
+            bool startTorrent, string category,
+            Dictionary<string, string> actualToVirtualDic = null)
         {
             var bencodeParser =
                 new BencodeNET.Parsing.BencodeParser();
@@ -78,6 +79,16 @@ namespace MyQbt
 
                 if (Helper.CheckPath(ref savePath))
                 {
+                    if (skipHashCheck)
+                    {
+                        if (!Helper.CanSkipCheck(
+                            bencodeTorrent,
+                            Helper.GetVirtualPath(savePath, actualToVirtualDic)))
+                        {
+                            throw new Exception("跳过哈希检测失败");
+                        }
+                    }
+
                     await QbtWebAPI.API.DownloadFromDisk(
                         new List<string>() { torrentPath }, savePath,
                         null, string.IsNullOrWhiteSpace(category) ? null : category,

@@ -183,32 +183,33 @@ namespace MyQbt
             }
         }
 
-        public static string GetLoaclPath(string path,
-            Dictionary<string, string> diskMapDic)
+        public static string GetVirtualPath(string actualPath,
+            Dictionary<string, string> actualToVirtualDic)
         {
-            if (diskMapDic == null) return path;
-            string strTemp = path.ToLower();
+            if (actualToVirtualDic == null) return actualPath;
 
-            foreach (KeyValuePair<string, string> kv in diskMapDic)
+            string strTemp = actualPath.ToUpper();
+
+            foreach (KeyValuePair<string, string> kv in actualToVirtualDic)
             {
-                int index = strTemp.IndexOf(kv.Value.ToLower());
+                int index = strTemp.IndexOf(kv.Key);
                 if (index == 0)
                 {
-                    return kv.Key + strTemp.Substring(kv.Value.Length);
+                    return kv.Value + strTemp.Substring(kv.Key.Length);
                 }
             }
 
-            return path;
+            return actualPath;
         }
 
         public static bool CanSkipCheck(
             BencodeNET.Torrents.Torrent torrent,
-            string localSaveFolder)
+            string virtualSaveFolder)
         {
             if (torrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Unknown) return false;
             else if (torrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single)
             {
-                string filePath = Path.Combine(localSaveFolder, torrent.File.FileName);
+                string filePath = Path.Combine(virtualSaveFolder, torrent.File.FileName);
                 if (File.Exists(filePath))
                 {
                     FileInfo fi = new FileInfo(filePath);
@@ -220,7 +221,7 @@ namespace MyQbt
             {
                 foreach (var v in torrent.Files)
                 {
-                    string filePath = Path.Combine(localSaveFolder, v.FullPath);
+                    string filePath = Path.Combine(virtualSaveFolder, v.FullPath);
                     if (File.Exists(filePath))
                     {
                         FileInfo fi = new FileInfo(filePath);

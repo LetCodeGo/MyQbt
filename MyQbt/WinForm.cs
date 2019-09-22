@@ -231,29 +231,33 @@ namespace MyQbt
             this.cbDiskTo.ResumeLayout();
         }
 
-        private Dictionary<string, string> GetDiskMap()
+        private Dictionary<string, string> GetVirtualToActualDiskMap()
         {
             string[] strMaps = this.rtbDiskMap.Text.ToUpper().Split(
                 new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            Dictionary<string, string> diskMapDic = new Dictionary<string, string>();
+
+            Dictionary<string, string> virtualToActualDiskMapDic =
+                new Dictionary<string, string>();
 
             foreach (string strMap in strMaps)
             {
                 string[] ss = strMap.Split(
                     new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
                 if (ss == null) continue;
-                for (int i = 0; i < ss.Length; i++) ss[i] = ss[i].Trim();
+
+                for (int i = 0; i < ss.Length; i++) ss[i] = ss[i].ToUpper().Trim();
+
                 if (ss.Length == 2 && ss[0].EndsWith("\\") && ss[1].EndsWith("\\"))
                 {
-                    if (diskMapDic.ContainsKey(ss[0]))
+                    if (virtualToActualDiskMapDic.ContainsKey(ss[0]))
                     {
-                        diskMapDic[ss[0]] = ss[1];
+                        virtualToActualDiskMapDic[ss[0]] = ss[1];
                     }
-                    else diskMapDic.Add(ss[0], ss[1]);
+                    else virtualToActualDiskMapDic.Add(ss[0], ss[1]);
                 }
             }
 
-            return diskMapDic;
+            return virtualToActualDiskMapDic;
         }
 
         private void CbUrl_SelectedIndexChanged(object sender, EventArgs e)
@@ -278,14 +282,22 @@ namespace MyQbt
             int index2 = this.cbSaveFolder.Text.LastIndexOf('(');
             string str2 = this.cbSaveFolder.Text.Substring(0, index2 - 1).Trim();
             string strTemp = Path.Combine(str1, str2).ToUpper();
+
             if (this.cbDiskMap.Checked)
             {
-                Dictionary<string, string> diskMapDic = GetDiskMap();
-                foreach (KeyValuePair<string, string> kv in diskMapDic)
+                Dictionary<string, string> virtualToActualDiskMapDic =
+                    GetVirtualToActualDiskMap();
+                foreach (KeyValuePair<string, string> kv in virtualToActualDiskMapDic)
                 {
-                    strTemp = strTemp.Replace(kv.Key, kv.Value);
+                    int index = strTemp.IndexOf(kv.Key);
+                    if (index == 0)
+                    {
+                        strTemp = kv.Value + strTemp.Substring(kv.Key.Length);
+                        break;
+                    }
                 }
             }
+
             this.cbSettingSaveFolder.Text = strTemp;
         }
 
@@ -359,7 +371,17 @@ namespace MyQbt
 
             if (dlg.ShowDialog() == DialogResult.OK)
             {
-                Dictionary<string, string> diskMapDic = GetDiskMap();
+                Dictionary<string, string> virtualToActualDic = GetVirtualToActualDiskMap();
+                Dictionary<string, string> actualToVirtualDic = null;
+                if (this.cbDiskMap.Checked)
+                {
+                    actualToVirtualDic = new Dictionary<string, string>();
+                    foreach (KeyValuePair<string, string> kv in virtualToActualDic)
+                    {
+                        actualToVirtualDic.Add(kv.Value, kv.Key);
+                    }
+                }
+
                 string strLog = "";
 
                 List<string> successList = new List<string>();
@@ -374,7 +396,8 @@ namespace MyQbt
                             await AddPrefixWithFileName.AddTorrent(
                                 torrentPath, settingSaveFolder,
                                 this.cbSkipHashCheck.Checked,
-                                this.cbStartTorrent.Checked, category);
+                                this.cbStartTorrent.Checked, category,
+                                actualToVirtualDic);
                             successList.Add(torrentPath);
                             UpdataComboxSettingSaveFolder(settingSaveFolder);
                         }
@@ -391,7 +414,7 @@ namespace MyQbt
                         AddTorrentManual form = new AddTorrentManual(
                             torrentPath, settingSaveFolder,
                             this.cbSkipHashCheck.Checked,
-                            this.cbStartTorrent.Checked, category)
+                            this.cbStartTorrent.Checked, category, actualToVirtualDic)
                         {
                             UpdataResultAndReason = this.UpdataManualAddResultAddReason
                         };
@@ -419,7 +442,7 @@ namespace MyQbt
                                     bencodeParser.Parse<BencodeNET.Torrents.Torrent>(torrentPath);
 
                                 if (Helper.CanSkipCheck(bencodeTorrent,
-                                    Helper.GetLoaclPath(settingSaveFolder, diskMapDic)))
+                                    Helper.GetVirtualPath(settingSaveFolder, actualToVirtualDic)))
                                 {
                                     await QbtWebAPI.API.DownloadFromDisk(
                                         new List<string>() { torrentPath }, settingSaveFolder,
@@ -471,6 +494,35 @@ namespace MyQbt
                 InfoForm infoForm = new InfoForm("Add Torrents Log", strLog);
                 infoForm.ShowDialog();
             }
+        }
+
+        private async void BtnGetCategoryAllTorrentSavePath_Click(object sender, EventArgs e)
+        {
+            string category = this.cbCategory.Text.Trim();
+            if (string.IsNullOrEmpty(category)) category = null;
+
+            List<QbtWebAPI.Data.Torrent> torrentList =
+                await QbtWebAPI.API.GetTorrents(QbtWebAPI.Enums.Status.All, category);
+
+            List<string> rstList = new List<string>();
+
+            foreach (QbtWebAPI.Data.Torrent torrent in torrentList)
+            {
+                if (torrent.Category != category) continue;
+
+                string strTemp = torrent.Save_Path;
+                if (!strTemp.ToLower().Contains(torrent.Name.ToLower()))
+                {
+                    strTemp = Path.Combine(strTemp, torrent.Name);
+                }
+                rstList.Add(strTemp);
+            }
+
+            rstList.Sort();
+
+            InfoForm infoForm = new InfoForm(
+                "Get Category All Torrent Save Path Log", string.Join("\n", rstList));
+            infoForm.ShowDialog();
         }
 
         private void UpdataComboxSettingSaveFolder(string settingSaveFolder)
@@ -743,7 +795,7 @@ namespace MyQbt
         private void RemoveAllCategoryTorrents()
         {
             string[] categorys = new string[] {
-                "DicMusic", "OpenCD", "Orpheus", "Redacted" };
+                "DicMusic", "OpenCD", "Orpheus", "Redacted", "GGN" };
 
             string actionDirectory = GetActionDirectory();
             if (actionDirectory == null) return;

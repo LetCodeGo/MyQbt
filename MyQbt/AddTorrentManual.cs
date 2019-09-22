@@ -22,6 +22,9 @@ namespace MyQbt
         private string torrentPath;
         private string settingSaveFolder;
         private string defaultCategory;
+        private Dictionary<string, string> actualToVirtualDic = null;
+
+        private BencodeNET.Torrents.Torrent bencodeTorrent = null;
 
         private List<string> trackerList;
         private DataNode rootNode;
@@ -164,7 +167,8 @@ namespace MyQbt
             string settingSaveFolder,
             bool skipHashCheck,
             bool startTorrent,
-            string category)
+            string category,
+            Dictionary<string, string> actualToVirtualDic = null)
         {
             InitializeComponent();
 
@@ -176,6 +180,7 @@ namespace MyQbt
             this.cbSkipHashCheck.Checked = skipHashCheck;
             this.cbStartTorrent.Checked = startTorrent;
             this.defaultCategory = category;
+            this.actualToVirtualDic = actualToVirtualDic;
         }
 
         private async void AddTorrentManual_Load(object sender, EventArgs e)
@@ -190,7 +195,7 @@ namespace MyQbt
             this.cbCategory.ResumeLayout();
 
             var bencodeParser = new BencodeNET.Parsing.BencodeParser();
-            var bencodeTorrent =
+            this.bencodeTorrent =
                 bencodeParser.Parse<BencodeNET.Torrents.Torrent>(this.torrentPath);
 
             if (bencodeTorrent == null ||
@@ -243,6 +248,18 @@ namespace MyQbt
 
             try
             {
+                if (this.cbSkipHashCheck.Checked)
+                {
+                    if (!Helper.CanSkipCheck(
+                        this.bencodeTorrent,
+                        Helper.GetVirtualPath(s1, this.actualToVirtualDic)))
+                    {
+                        this.isAddTorrentSuccess = false;
+                        this.failedReason = "跳过哈希检测失败";
+                        return;
+                    }
+                }
+
                 await QbtWebAPI.API.DownloadFromDisk(
                     new List<string>() { torrentPath },
                     s1, null,
@@ -258,8 +275,10 @@ namespace MyQbt
             {
                 this.failedReason = ex.Message;
             }
-
-            this.Close();
+            finally
+            {
+                this.Close();
+            }
         }
 
         private void BtnCancel_Click(object sender, EventArgs e)

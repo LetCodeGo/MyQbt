@@ -226,14 +226,14 @@ namespace QbtWebAPI
             HttpResponseMessage reply;
             var parameters = "?";
 
-            parameters += "filter=" + filter.ToString() + "&";
+            parameters += "filter=" + filter.ToString().ToLower() + "&";
 
             if (category != null)
                 parameters += "category=" + category + "&";
 
-            parameters += "sort=" + sort + "&";
+            parameters += "sort=" + sort.ToString().ToLower() + "&";
 
-            parameters += "reverse=" + reverse.ToString() + "&";
+            parameters += "reverse=" + reverse.ToString().ToLower() + "&";
 
             if (limit != null)
                 parameters += "limit=" + limit + "&";
