@@ -164,6 +164,7 @@ namespace MyQbt
 
         public AddTorrentManual(
             string torrentPath,
+            BencodeNET.Torrents.Torrent bencodeTorrent,
             string settingSaveFolder,
             bool skipHashCheck,
             bool startTorrent,
@@ -176,6 +177,7 @@ namespace MyQbt
             this.failedReason = "程序错误";
 
             this.torrentPath = torrentPath;
+            this.bencodeTorrent = bencodeTorrent;
             this.settingSaveFolder = settingSaveFolder;
             this.cbSkipHashCheck.Checked = skipHashCheck;
             this.cbStartTorrent.Checked = startTorrent;
@@ -193,17 +195,6 @@ namespace MyQbt
                 (await QbtWebAPI.API.GetAllCategoryString()).ToArray());
             this.cbCategory.Text = this.defaultCategory;
             this.cbCategory.ResumeLayout();
-
-            var bencodeParser = new BencodeNET.Parsing.BencodeParser();
-            this.bencodeTorrent =
-                bencodeParser.Parse<BencodeNET.Torrents.Torrent>(this.torrentPath);
-
-            if (bencodeTorrent == null ||
-                bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Unknown)
-            {
-                MessageBox.Show(string.Format("{0}\r\n读种子文件出错", this.torrentPath));
-                return;
-            }
 
             this.trackerList = new List<string>();
             Array.ForEach<IList<string>>(

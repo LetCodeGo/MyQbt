@@ -31,6 +31,8 @@ namespace MyQbt
 
         private Func<bool> CheckµTorrentNeedSave = null;
 
+        private Dictionary<string, string> domainCategoryDic = null;
+
         public WinForm()
         {
             InitializeComponent();
@@ -40,8 +42,10 @@ namespace MyQbt
         {
             this.Icon = Properties.Resources.icon;
             this.groupBoxAdd.Enabled = false;
+            this.groupBoxOnlineOther.Enabled = false;
 
             LoadConfig();
+            InitDomainCategoryDic();
 
             if (configData.LastUseUrl != null && configData.ConnectList != null)
             {
@@ -104,6 +108,25 @@ namespace MyQbt
         private void WinForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             SaveConfig();
+        }
+
+        private void InitDomainCategoryDic()
+        {
+            this.domainCategoryDic = new Dictionary<string, string>();
+            if (this.configData.DomainCategoryList != null)
+            {
+                for (int i = 0; i < this.configData.DomainCategoryList.Count; i++)
+                {
+                    string domain = this.configData.DomainCategoryList[i].Domain;
+                    string category = this.configData.DomainCategoryList[i].Category;
+
+                    if (this.domainCategoryDic.ContainsKey(domain))
+                    {
+                        this.domainCategoryDic[domain] = category;
+                    }
+                    else this.domainCategoryDic.Add(domain, category);
+                }
+            }
         }
 
         private void LoadConfig()
@@ -320,6 +343,8 @@ namespace MyQbt
             if (flag ?? false)
             {
                 this.groupBoxAdd.Enabled = true;
+                this.groupBoxOnlineOther.Enabled = true;
+
                 InitComboxCategory();
 
                 if (configData.ConnectList == null)
@@ -351,6 +376,7 @@ namespace MyQbt
             else
             {
                 this.groupBoxAdd.Enabled = false;
+                this.groupBoxOnlineOther.Enabled = false;
                 MessageBox.Show(errMsg);
             }
         }
@@ -382,22 +408,44 @@ namespace MyQbt
                     }
                 }
 
-                string strLog = "";
-
                 List<string> successList = new List<string>();
                 Dictionary<string, string> failedDic = new Dictionary<string, string>();
+                BencodeNET.Objects.BString trackersBString =
+                    new BencodeNET.Objects.BString("trackers");
 
-                if (this.rbAddPrefixWithFileName.Checked)
+                foreach (string torrentPath in dlg.FileNames)
                 {
-                    foreach (string torrentPath in dlg.FileNames)
+                    var bencodeParser = new BencodeNET.Parsing.BencodeParser();
+                    var bencodeTorrent =
+                        bencodeParser.Parse<BencodeNET.Torrents.Torrent>(torrentPath);
+
+                    if (bencodeTorrent == null ||
+                        bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Unknown)
+                    {
+                        failedDic.Add(torrentPath, "读取种子文件出错");
+                        continue;
+                    }
+
+                    if (bencodeTorrent.Trackers.Count == 1 &&
+                        bencodeTorrent.Trackers[0].Count == 1)
+                    {
+                        string trackerDomain = (new Uri(bencodeTorrent.Trackers[0][0])).Host;
+                        if (this.domainCategoryDic.ContainsKey(trackerDomain))
+                        {
+                            category = this.domainCategoryDic[trackerDomain];
+                        }
+                    }
+
+                    if (this.rbAddPrefixWithFileName.Checked)
                     {
                         try
                         {
                             await AddPrefixWithFileName.AddTorrent(
-                                torrentPath, settingSaveFolder,
+                                torrentPath, bencodeTorrent, settingSaveFolder,
                                 this.cbSkipHashCheck.Checked,
                                 this.cbStartTorrent.Checked, category,
                                 actualToVirtualDic);
+
                             successList.Add(torrentPath);
                             UpdataComboxSettingSaveFolder(settingSaveFolder);
                         }
@@ -406,13 +454,10 @@ namespace MyQbt
                             failedDic.Add(torrentPath, ex.Message);
                         }
                     }
-                }
-                else if (this.rbManual.Checked)
-                {
-                    foreach (string torrentPath in dlg.FileNames)
+                    else if (this.rbManual.Checked)
                     {
                         AddTorrentManual form = new AddTorrentManual(
-                            torrentPath, settingSaveFolder,
+                            torrentPath, bencodeTorrent, settingSaveFolder,
                             this.cbSkipHashCheck.Checked,
                             this.cbStartTorrent.Checked, category, actualToVirtualDic)
                         {
@@ -427,47 +472,31 @@ namespace MyQbt
                         }
                         else failedDic.Add(torrentPath, this.manualAddFailedReason);
                     }
-                }
-                else
-                {
-                    try
+                    else
                     {
-                        if (this.cbSkipHashCheck.Checked)
+                        if (this.cbSkipHashCheck.Checked &&
+                            (!Helper.CanSkipCheck(bencodeTorrent,
+                            Helper.GetVirtualPath(settingSaveFolder, actualToVirtualDic))))
                         {
-                            foreach (string torrentPath in dlg.FileNames)
-                            {
-                                var bencodeParser =
-                                    new BencodeNET.Parsing.BencodeParser();
-                                var bencodeTorrent =
-                                    bencodeParser.Parse<BencodeNET.Torrents.Torrent>(torrentPath);
-
-                                if (Helper.CanSkipCheck(bencodeTorrent,
-                                    Helper.GetVirtualPath(settingSaveFolder, actualToVirtualDic)))
-                                {
-                                    await QbtWebAPI.API.DownloadFromDisk(
-                                        new List<string>() { torrentPath }, settingSaveFolder,
-                                        null, string.IsNullOrWhiteSpace(category) ? null : category,
-                                        this.cbSkipHashCheck.Checked, !this.cbStartTorrent.Checked,
-                                        true, null, null, null, null, null);
-                                    successList.Add(torrentPath);
-                                }
-                            }
+                            failedDic.Add(torrentPath, "跳过哈希检测失败");
+                            continue;
                         }
-                        else
+
+                        try
                         {
                             await QbtWebAPI.API.DownloadFromDisk(
-                                dlg.FileNames.ToList(), settingSaveFolder,
+                                new List<string>() { torrentPath }, settingSaveFolder,
                                 null, string.IsNullOrWhiteSpace(category) ? null : category,
                                 this.cbSkipHashCheck.Checked, !this.cbStartTorrent.Checked,
                                 true, null, null, null, null, null);
-                        }
 
-                        successList.AddRange(dlg.FileNames);
-                        UpdataComboxSettingSaveFolder(settingSaveFolder);
-                    }
-                    catch (Exception ex)
-                    {
-                        Array.ForEach<string>(dlg.FileNames, x => failedDic.Add(x, ex.Message));
+                            successList.Add(torrentPath);
+                            UpdataComboxSettingSaveFolder(settingSaveFolder);
+                        }
+                        catch (Exception ex)
+                        {
+                            failedDic.Add(torrentPath, ex.Message);
+                        }
                     }
                 }
 
@@ -490,7 +519,7 @@ namespace MyQbt
                     j++;
                 }
 
-                strLog = string.Format("{0}\n{1}", strSuccess, strFailed);
+                string strLog = string.Format("{0}\n{1}", strSuccess, strFailed);
                 InfoForm infoForm = new InfoForm("Add Torrents Log", strLog);
                 infoForm.ShowDialog();
             }
@@ -498,30 +527,62 @@ namespace MyQbt
 
         private async void BtnGetCategoryAllTorrentSavePath_Click(object sender, EventArgs e)
         {
-            string category = this.cbCategory.Text.Trim();
-            if (string.IsNullOrEmpty(category)) category = null;
+            //string category = this.cbCategory.Text.Trim();
+            //if (string.IsNullOrEmpty(category)) category = null;
 
+            //List<QbtWebAPI.Data.Torrent> torrentList =
+            //    await QbtWebAPI.API.GetTorrents(QbtWebAPI.Enums.Status.All, category);
+
+            //List<string> rstList = new List<string>();
+
+            //foreach (QbtWebAPI.Data.Torrent torrent in torrentList)
+            //{
+            //    if (torrent.Category != category) continue;
+
+            //    string strTemp = torrent.Save_Path;
+            //    if (!strTemp.ToLower().Contains(torrent.Name.ToLower()))
+            //    {
+            //        strTemp = Path.Combine(strTemp, torrent.Name);
+            //    }
+            //    rstList.Add(strTemp);
+            //}
+
+            //rstList.Sort();
+
+            //InfoForm infoForm = new InfoForm(
+            //    "Get Category All Torrent Save Path Log", string.Join("\n", rstList));
+            //infoForm.ShowDialog();
+            await GetAllDomainAndCategory();
+        }
+
+        private async Task GetAllDomainAndCategory()
+        {
             List<QbtWebAPI.Data.Torrent> torrentList =
-                await QbtWebAPI.API.GetTorrents(QbtWebAPI.Enums.Status.All, category);
+                await QbtWebAPI.API.GetTorrents(QbtWebAPI.Enums.Status.All);
 
-            List<string> rstList = new List<string>();
+            Dictionary<string, string> onlineDomainCategoryDic =
+                new Dictionary<string, string>();
 
             foreach (QbtWebAPI.Data.Torrent torrent in torrentList)
             {
-                if (torrent.Category != category) continue;
+                if (torrent.Tracker == null ||
+                    torrent.Category == "BT" ||
+                    onlineDomainCategoryDic.ContainsKey(torrent.Category)) continue;
 
-                string strTemp = torrent.Save_Path;
-                if (!strTemp.ToLower().Contains(torrent.Name.ToLower()))
-                {
-                    strTemp = Path.Combine(strTemp, torrent.Name);
-                }
-                rstList.Add(strTemp);
+                string domain = torrent.Tracker.Host;
+
+                onlineDomainCategoryDic.Add(torrent.Category, domain);
             }
 
-            rstList.Sort();
+            string strLog = "";
+            foreach (KeyValuePair<string, string> kv in onlineDomainCategoryDic)
+            {
+                strLog += string.Format(
+                    "<DomainCategory Domain=\"{0}\" Category=\"{1}\" />\n", kv.Value, kv.Key);
+            }
 
             InfoForm infoForm = new InfoForm(
-                "Get Category All Torrent Save Path Log", string.Join("\n", rstList));
+                "Domain And Category", strLog);
             infoForm.ShowDialog();
         }
 
@@ -665,6 +726,8 @@ namespace MyQbt
                 new BencodeNET.Objects.BString("active_time");
             BencodeNET.Objects.BString qhrfBString =
                 new BencodeNET.Objects.BString("qBt-hasRootFolder");
+            BencodeNET.Objects.BString qnameBString =
+                new BencodeNET.Objects.BString("qBt-name");
 
             foreach (string filePath in files)
             {
@@ -699,7 +762,7 @@ namespace MyQbt
                     if (hasRootFolder ||
                         bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single)
                     {
-                        detectPath = Path.Combine(detectPath, bencodeTorrent.DisplayName);
+                        detectPath = Path.Combine(detectPath, bdic[qnameBString].ToString());
                     }
 
                     logList.Add(string.Format("{0} {1}",
@@ -730,6 +793,7 @@ namespace MyQbt
 
             string[] files = Directory.GetFiles(
                 actionDirectory, "*.fastresume", SearchOption.AllDirectories);
+
             var parser = new BencodeNET.Parsing.BencodeParser();
             BencodeNET.Objects.BString qspBString =
                 new BencodeNET.Objects.BString("qBt-savePath");
@@ -737,6 +801,8 @@ namespace MyQbt
                 new BencodeNET.Objects.BString("qBt-hasRootFolder");
             BencodeNET.Objects.BString ctBString =
                 new BencodeNET.Objects.BString("completed_time");
+            BencodeNET.Objects.BString qnameBString =
+                new BencodeNET.Objects.BString("qBt-name");
             Dictionary<string, string> removeDic = new Dictionary<string, string>();
 
             foreach (string filePath in files)
@@ -752,7 +818,7 @@ namespace MyQbt
                 if (hasRootFolder ||
                     bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single)
                 {
-                    detectPath = Path.Combine(detectPath, bencodeTorrent.DisplayName);
+                    detectPath = Path.Combine(detectPath, bdic[qnameBString].ToString());
                 }
 
                 if (Directory.Exists(detectPath) || File.Exists(detectPath)) continue;

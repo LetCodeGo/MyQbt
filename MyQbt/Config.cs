@@ -21,6 +21,15 @@ namespace MyQbt
             public string Password;
         }
 
+        [XmlRoot("DomainCategory")]
+        public class DomainCategory
+        {
+            [XmlAttribute("Domain")]
+            public string Domain;
+            [XmlAttribute("Category")]
+            public string Category;
+        }
+
         [XmlAttribute("LastUseUrl")]
         public string LastUseUrl;
         [XmlArray("ConnectList")]
@@ -30,6 +39,9 @@ namespace MyQbt
         public string LastUseCategory;
         [XmlArray("CategoryList")]
         public List<string> CategoryList;
+
+        [XmlArray("DomainCategoryList")]
+        public List<DomainCategory> DomainCategoryList;
 
         [XmlArray("SaveFolderList")]
         public List<string> SaveFolderList;

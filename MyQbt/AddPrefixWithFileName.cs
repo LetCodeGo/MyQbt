@@ -57,15 +57,11 @@ namespace MyQbt
         }
 
         public static async Task AddTorrent(
-            string torrentPath, string saveFolder, bool skipHashCheck,
+            string torrentPath, BencodeNET.Torrents.Torrent bencodeTorrent,
+            string saveFolder, bool skipHashCheck,
             bool startTorrent, string category,
             Dictionary<string, string> actualToVirtualDic = null)
         {
-            var bencodeParser =
-                new BencodeNET.Parsing.BencodeParser();
-            var bencodeTorrent =
-                bencodeParser.Parse<BencodeNET.Torrents.Torrent>(torrentPath);
-
             if (bencodeTorrent != null)
             {
                 string strTemp = bencodeTorrent.DisplayName.ToLower();
