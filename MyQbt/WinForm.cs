@@ -384,7 +384,6 @@ namespace MyQbt
         private async void BtnAddTorrent_Click(object sender, EventArgs e)
         {
             string settingSaveFolder = this.cbSettingSaveFolder.Text;
-            string category = this.cbCategory.Text.Trim();
 
             if (!Helper.CheckPath(ref settingSaveFolder)) return;
             else this.cbSettingSaveFolder.Text = settingSaveFolder;
@@ -426,7 +425,10 @@ namespace MyQbt
                         continue;
                     }
 
-                    if (bencodeTorrent.Trackers.Count == 1 &&
+                    string category = this.cbCategory.Text.Trim();
+
+                    if (string.IsNullOrWhiteSpace(category) &&
+                        bencodeTorrent.Trackers.Count == 1 &&
                         bencodeTorrent.Trackers[0].Count == 1)
                     {
                         string trackerDomain = (new Uri(bencodeTorrent.Trackers[0][0])).Host;
