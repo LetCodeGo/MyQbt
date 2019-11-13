@@ -728,8 +728,6 @@ namespace MyQbt
                 new BencodeNET.Objects.BString("active_time");
             BencodeNET.Objects.BString qhrfBString =
                 new BencodeNET.Objects.BString("qBt-hasRootFolder");
-            BencodeNET.Objects.BString qnameBString =
-                new BencodeNET.Objects.BString("qBt-name");
 
             foreach (string filePath in files)
             {
@@ -764,7 +762,7 @@ namespace MyQbt
                     if (hasRootFolder ||
                         bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single)
                     {
-                        detectPath = Path.Combine(detectPath, bdic[qnameBString].ToString());
+                        detectPath = Path.Combine(detectPath, bencodeTorrent.DisplayName);
                     }
 
                     logList.Add(string.Format("{0} {1}",
@@ -803,8 +801,7 @@ namespace MyQbt
                 new BencodeNET.Objects.BString("qBt-hasRootFolder");
             BencodeNET.Objects.BString ctBString =
                 new BencodeNET.Objects.BString("completed_time");
-            BencodeNET.Objects.BString qnameBString =
-                new BencodeNET.Objects.BString("qBt-name");
+
             Dictionary<string, string> removeDic = new Dictionary<string, string>();
 
             foreach (string filePath in files)
@@ -820,7 +817,7 @@ namespace MyQbt
                 if (hasRootFolder ||
                     bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single)
                 {
-                    detectPath = Path.Combine(detectPath, bdic[qnameBString].ToString());
+                    detectPath = Path.Combine(detectPath, bencodeTorrent.DisplayName);
                 }
 
                 if (Directory.Exists(detectPath) || File.Exists(detectPath)) continue;

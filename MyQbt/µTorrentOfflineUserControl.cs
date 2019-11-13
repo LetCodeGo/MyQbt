@@ -103,6 +103,9 @@ namespace MyQbt
             BString blabel = new BString("label");
             BString bcompleded = new BString("completed_on");
 
+            List<string> exceptedCatagoryList =
+                new List<string> { "GGN", "OpenCD", "ORPHEUS", "Redacted" };
+
             // 待删列表
             List<BString> deleteList = new List<BString>();
 
@@ -112,7 +115,7 @@ namespace MyQbt
                 {
                     var tbd = kv.Value as BDictionary;
 
-                    if (tbd[blabel].ToString() == "GGN") continue;
+                    if (exceptedCatagoryList.Contains(tbd[blabel].ToString())) continue;
 
                     string tpath = tbd[bpath].ToString();
 
