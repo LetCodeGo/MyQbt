@@ -68,10 +68,14 @@ namespace MyQbt
                 strTemp = Path.GetFileNameWithoutExtension(torrentPath) +
                     AddDotOrBlank(strTemp) +
                     bencodeTorrent.DisplayName;
-                string strTitle =
+
+                string savePath = Path.Combine(saveFolder,
                     bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single ?
-                    Path.GetFileNameWithoutExtension(strTemp) : strTemp;
-                string savePath = Path.Combine(saveFolder, strTitle);
+                    Path.GetFileNameWithoutExtension(strTemp) : strTemp);
+
+                string strName =
+                    bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single ?
+                    bencodeTorrent.DisplayName : strTemp;
 
                 if (Helper.CheckPath(ref savePath))
                 {
@@ -88,7 +92,7 @@ namespace MyQbt
                     await QbtWebAPI.API.DownloadFromDisk(
                         new List<string>() { torrentPath }, savePath,
                         null, string.IsNullOrWhiteSpace(category) ? null : category,
-                        skipHashCheck, !startTorrent, false, strTitle, null, null, null, null);
+                        skipHashCheck, !startTorrent, false, strName, null, null, null, null);
                 }
                 else throw new Exception("保存路径包含无效字符");
             }

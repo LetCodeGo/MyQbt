@@ -490,7 +490,7 @@ namespace MyQbt
                                 new List<string>() { torrentPath }, settingSaveFolder,
                                 null, string.IsNullOrWhiteSpace(category) ? null : category,
                                 this.cbSkipHashCheck.Checked, !this.cbStartTorrent.Checked,
-                                true, null, null, null, null, null);
+                                null, bencodeTorrent.DisplayName, null, null, null, null);
 
                             successList.Add(torrentPath);
                             UpdataComboxSettingSaveFolder(settingSaveFolder);
@@ -720,6 +720,8 @@ namespace MyQbt
             string[] files = Directory.GetFiles(
                 actionDirectory, "*.fastresume", SearchOption.AllDirectories);
             var parser = new BencodeNET.Parsing.BencodeParser();
+            BencodeNET.Objects.BString qnameBString =
+                new BencodeNET.Objects.BString("qBt-name");
             BencodeNET.Objects.BString s1BString =
                 new BencodeNET.Objects.BString("qBt-savePath");
             BencodeNET.Objects.BString s2BString =
@@ -759,8 +761,13 @@ namespace MyQbt
                     string detectPath = bdic[s1BString].ToString();
                     bool hasRootFolder = (bdic[qhrfBString].ToString() == "1" ? true : false);
 
-                    if (hasRootFolder ||
-                        bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single)
+                    if (hasRootFolder)
+                    {
+                        string nameTemp = bdic[qnameBString].ToString();
+                        detectPath = Path.Combine(detectPath,
+                            string.IsNullOrWhiteSpace(nameTemp) ? bencodeTorrent.DisplayName : nameTemp);
+                    }
+                    else if (bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single)
                     {
                         detectPath = Path.Combine(detectPath, bencodeTorrent.DisplayName);
                     }
@@ -795,6 +802,10 @@ namespace MyQbt
                 actionDirectory, "*.fastresume", SearchOption.AllDirectories);
 
             var parser = new BencodeNET.Parsing.BencodeParser();
+            BencodeNET.Objects.BString categoryBString =
+                new BencodeNET.Objects.BString("qBt-category");
+            BencodeNET.Objects.BString qnameBString =
+                new BencodeNET.Objects.BString("qBt-name");
             BencodeNET.Objects.BString qspBString =
                 new BencodeNET.Objects.BString("qBt-savePath");
             BencodeNET.Objects.BString qhrfBString =
@@ -814,8 +825,13 @@ namespace MyQbt
                 string detectPath = bdic[qspBString].ToString();
                 bool hasRootFolder = (bdic[qhrfBString].ToString() == "1" ? true : false);
 
-                if (hasRootFolder ||
-                    bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single)
+                if (hasRootFolder)
+                {
+                    string nameTemp = bdic[qnameBString].ToString();
+                    detectPath = Path.Combine(detectPath,
+                        string.IsNullOrWhiteSpace(nameTemp) ? bencodeTorrent.DisplayName : nameTemp);
+                }
+                else if (bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single)
                 {
                     detectPath = Path.Combine(detectPath, bencodeTorrent.DisplayName);
                 }

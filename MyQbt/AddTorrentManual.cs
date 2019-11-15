@@ -235,7 +235,12 @@ namespace MyQbt
         {
             string s1 = this.tbSaveFolder.Text;
             if (!Helper.CheckPath(ref s1)) return;
+
             string s2 = Path.GetFileName(s1);
+            if (bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single)
+            {
+                s2 = bencodeTorrent.DisplayName;
+            }
 
             try
             {
