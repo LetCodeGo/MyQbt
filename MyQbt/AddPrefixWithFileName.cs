@@ -83,7 +83,7 @@ namespace MyQbt
                     {
                         if (!Helper.CanSkipCheck(
                             bencodeTorrent,
-                            Helper.GetVirtualPath(savePath, actualToVirtualDic)))
+                            Helper.GetVirtualPath(savePath, actualToVirtualDic), false))
                         {
                             throw new Exception("跳过哈希检测失败");
                         }

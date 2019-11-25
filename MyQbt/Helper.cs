@@ -204,7 +204,7 @@ namespace MyQbt
 
         public static bool CanSkipCheck(
             BencodeNET.Torrents.Torrent torrent,
-            string virtualSaveFolder)
+            string virtualSaveFolder, bool hasRootFolder)
         {
             if (torrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Unknown) return false;
             else if (torrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single)
@@ -219,6 +219,9 @@ namespace MyQbt
             }
             else
             {
+                if (hasRootFolder)
+                    virtualSaveFolder = Path.Combine(virtualSaveFolder, torrent.DisplayName);
+
                 foreach (var v in torrent.Files)
                 {
                     string filePath = Path.Combine(virtualSaveFolder, v.FullPath);

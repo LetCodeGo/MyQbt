@@ -248,7 +248,7 @@ namespace MyQbt
                 {
                     if (!Helper.CanSkipCheck(
                         this.bencodeTorrent,
-                        Helper.GetVirtualPath(s1, this.actualToVirtualDic)))
+                        Helper.GetVirtualPath(s1, this.actualToVirtualDic), false))
                     {
                         this.isAddTorrentSuccess = false;
                         this.failedReason = "跳过哈希检测失败";

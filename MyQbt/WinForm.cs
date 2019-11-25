@@ -476,9 +476,12 @@ namespace MyQbt
                     }
                     else
                     {
+                        bool hasRootFolder = 
+                            (bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Multi);
+
                         if (this.cbSkipHashCheck.Checked &&
                             (!Helper.CanSkipCheck(bencodeTorrent,
-                            Helper.GetVirtualPath(settingSaveFolder, actualToVirtualDic))))
+                            Helper.GetVirtualPath(settingSaveFolder, actualToVirtualDic), hasRootFolder)))
                         {
                             failedDic.Add(torrentPath, "跳过哈希检测失败");
                             continue;
