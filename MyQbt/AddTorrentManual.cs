@@ -237,10 +237,6 @@ namespace MyQbt
             if (!Helper.CheckPath(ref s1)) return;
 
             string s2 = Path.GetFileName(s1);
-            if (bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single)
-            {
-                s2 = bencodeTorrent.DisplayName;
-            }
 
             try
             {

@@ -64,35 +64,33 @@ namespace MyQbt
         {
             if (bencodeTorrent != null)
             {
-                string strTemp = bencodeTorrent.DisplayName.ToLower();
-                strTemp = Path.GetFileNameWithoutExtension(torrentPath) +
-                    AddDotOrBlank(strTemp) +
+                string strTitle =
+                    bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single ?
+                    Path.GetFileNameWithoutExtension(bencodeTorrent.DisplayName) :
                     bencodeTorrent.DisplayName;
 
-                string savePath = Path.Combine(saveFolder,
-                    bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single ?
-                    Path.GetFileNameWithoutExtension(strTemp) : strTemp);
+                strTitle = Path.GetFileNameWithoutExtension(torrentPath) +
+                    AddDotOrBlank(strTitle) +
+                    strTitle;
 
-                string strName =
-                    bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single ?
-                    bencodeTorrent.DisplayName : strTemp;
+                string strSaveFolderPath = Path.Combine(saveFolder, strTitle);
 
-                if (Helper.CheckPath(ref savePath))
+                if (Helper.CheckPath(ref strSaveFolderPath))
                 {
                     if (skipHashCheck)
                     {
                         if (!Helper.CanSkipCheck(
                             bencodeTorrent,
-                            Helper.GetVirtualPath(savePath, actualToVirtualDic), false))
+                            Helper.GetVirtualPath(strSaveFolderPath, actualToVirtualDic), false))
                         {
                             throw new Exception("跳过哈希检测失败");
                         }
                     }
 
                     await QbtWebAPI.API.DownloadFromDisk(
-                        new List<string>() { torrentPath }, savePath,
+                        new List<string>() { torrentPath }, strSaveFolderPath,
                         null, string.IsNullOrWhiteSpace(category) ? null : category,
-                        skipHashCheck, !startTorrent, false, strName, null, null, null, null);
+                        skipHashCheck, !startTorrent, false, strTitle, null, null, null, null);
                 }
                 else throw new Exception("保存路径包含无效字符");
             }
