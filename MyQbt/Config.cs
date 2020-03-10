@@ -29,7 +29,8 @@ namespace MyQbt
             [XmlAttribute("Category")]
             public string Category;
         }
-
+        [XmlAttribute("IsDiskMap")]
+        public bool IsDiskMap;
         [XmlAttribute("LastUseUrl")]
         public string LastUseUrl;
         [XmlArray("ConnectList")]

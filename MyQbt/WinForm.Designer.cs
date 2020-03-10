@@ -34,6 +34,8 @@
             this.btnLogin = new System.Windows.Forms.Button();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPageqBittorrentOnline = new System.Windows.Forms.TabPage();
+            this.groupBoxOnlineOther = new System.Windows.Forms.GroupBox();
+            this.btnGetCategoryAllTorrentSavePath = new System.Windows.Forms.Button();
             this.groupBoxDiskMap = new System.Windows.Forms.GroupBox();
             this.rtbDiskMap = new System.Windows.Forms.RichTextBox();
             this.groupBoxAdd = new System.Windows.Forms.GroupBox();
@@ -70,10 +72,9 @@
             this.cbDiskTo = new System.Windows.Forms.ComboBox();
             this.cbDiskFrom = new System.Windows.Forms.ComboBox();
             this.tabPageµTorrentOffline = new System.Windows.Forms.TabPage();
-            this.groupBoxOnlineOther = new System.Windows.Forms.GroupBox();
-            this.btnGetCategoryAllTorrentSavePath = new System.Windows.Forms.Button();
             this.tabControl.SuspendLayout();
             this.tabPageqBittorrentOnline.SuspendLayout();
+            this.groupBoxOnlineOther.SuspendLayout();
             this.groupBoxDiskMap.SuspendLayout();
             this.groupBoxAdd.SuspendLayout();
             this.groupBoxAddSaveFolder.SuspendLayout();
@@ -83,7 +84,6 @@
             this.groupBoxOfflineOther.SuspendLayout();
             this.groupBoxTrackers.SuspendLayout();
             this.groupBoxModifyDisk.SuspendLayout();
-            this.groupBoxOnlineOther.SuspendLayout();
             this.SuspendLayout();
             // 
             // cbUrl
@@ -154,6 +154,26 @@
             this.tabPageqBittorrentOnline.TabIndex = 0;
             this.tabPageqBittorrentOnline.Text = "qBittorrent 在线";
             this.tabPageqBittorrentOnline.UseVisualStyleBackColor = true;
+            // 
+            // groupBoxOnlineOther
+            // 
+            this.groupBoxOnlineOther.Controls.Add(this.btnGetCategoryAllTorrentSavePath);
+            this.groupBoxOnlineOther.Location = new System.Drawing.Point(284, 271);
+            this.groupBoxOnlineOther.Name = "groupBoxOnlineOther";
+            this.groupBoxOnlineOther.Size = new System.Drawing.Size(500, 145);
+            this.groupBoxOnlineOther.TabIndex = 7;
+            this.groupBoxOnlineOther.TabStop = false;
+            this.groupBoxOnlineOther.Text = "其他";
+            // 
+            // btnGetCategoryAllTorrentSavePath
+            // 
+            this.btnGetCategoryAllTorrentSavePath.Location = new System.Drawing.Point(12, 20);
+            this.btnGetCategoryAllTorrentSavePath.Name = "btnGetCategoryAllTorrentSavePath";
+            this.btnGetCategoryAllTorrentSavePath.Size = new System.Drawing.Size(476, 23);
+            this.btnGetCategoryAllTorrentSavePath.TabIndex = 5;
+            this.btnGetCategoryAllTorrentSavePath.Text = "获取分类下所有种子保存路径";
+            this.btnGetCategoryAllTorrentSavePath.UseVisualStyleBackColor = true;
+            this.btnGetCategoryAllTorrentSavePath.Click += new System.EventHandler(this.BtnGetCategoryAllTorrentSavePath_Click);
             // 
             // groupBoxDiskMap
             // 
@@ -254,8 +274,6 @@
             // cbDiskMap
             // 
             this.cbDiskMap.AutoSize = true;
-            this.cbDiskMap.Checked = true;
-            this.cbDiskMap.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cbDiskMap.Location = new System.Drawing.Point(6, 46);
             this.cbDiskMap.Name = "cbDiskMap";
             this.cbDiskMap.Size = new System.Drawing.Size(240, 16);
@@ -534,26 +552,6 @@
             this.tabPageµTorrentOffline.Text = "µTorrent 离线";
             this.tabPageµTorrentOffline.UseVisualStyleBackColor = true;
             // 
-            // groupBoxOnlineOther
-            // 
-            this.groupBoxOnlineOther.Controls.Add(this.btnGetCategoryAllTorrentSavePath);
-            this.groupBoxOnlineOther.Location = new System.Drawing.Point(284, 271);
-            this.groupBoxOnlineOther.Name = "groupBoxOnlineOther";
-            this.groupBoxOnlineOther.Size = new System.Drawing.Size(500, 145);
-            this.groupBoxOnlineOther.TabIndex = 7;
-            this.groupBoxOnlineOther.TabStop = false;
-            this.groupBoxOnlineOther.Text = "其他";
-            // 
-            // btnGetCategoryAllTorrentSavePath
-            // 
-            this.btnGetCategoryAllTorrentSavePath.Location = new System.Drawing.Point(12, 20);
-            this.btnGetCategoryAllTorrentSavePath.Name = "btnGetCategoryAllTorrentSavePath";
-            this.btnGetCategoryAllTorrentSavePath.Size = new System.Drawing.Size(476, 23);
-            this.btnGetCategoryAllTorrentSavePath.TabIndex = 5;
-            this.btnGetCategoryAllTorrentSavePath.Text = "获取分类下所有种子保存路径";
-            this.btnGetCategoryAllTorrentSavePath.UseVisualStyleBackColor = true;
-            this.btnGetCategoryAllTorrentSavePath.Click += new System.EventHandler(this.BtnGetCategoryAllTorrentSavePath_Click);
-            // 
             // WinForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -569,6 +567,7 @@
             this.Load += new System.EventHandler(this.WinForm_Load);
             this.tabControl.ResumeLayout(false);
             this.tabPageqBittorrentOnline.ResumeLayout(false);
+            this.groupBoxOnlineOther.ResumeLayout(false);
             this.groupBoxDiskMap.ResumeLayout(false);
             this.groupBoxAdd.ResumeLayout(false);
             this.groupBoxAdd.PerformLayout();
@@ -584,7 +583,6 @@
             this.groupBoxTrackers.PerformLayout();
             this.groupBoxModifyDisk.ResumeLayout(false);
             this.groupBoxModifyDisk.PerformLayout();
-            this.groupBoxOnlineOther.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

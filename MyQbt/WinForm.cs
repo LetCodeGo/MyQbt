@@ -44,7 +44,13 @@ namespace MyQbt
             this.groupBoxAdd.Enabled = false;
             this.groupBoxOnlineOther.Enabled = false;
 
+            this.groupBoxOnlineOther.Visible = false;
+            this.buttonOther.Visible = false;
+
             LoadConfig();
+            this.cbDiskMap.Checked = configData.IsDiskMap;
+            this.cbDiskMap.CheckedChanged +=
+                CbSaveDiskOrFolder_SelectedIndexChanged;
             InitDomainCategoryDic();
 
             if (configData.LastUseUrl != null && configData.ConnectList != null)
@@ -140,11 +146,16 @@ namespace MyQbt
                     configData = xmlSerializer.Deserialize(fileStream) as Config;
                 }
             }
-            if (configData == null) configData = new Config();
+            if (configData == null)
+            {
+                configData = new Config();
+                configData.IsDiskMap = false;
+            }
         }
 
         private void SaveConfig()
         {
+            configData.IsDiskMap = this.cbDiskMap.Checked;
             configData.DiskMapString = Convert.ToBase64String(
                 Encoding.Default.GetBytes(this.rtbDiskMap.Text));
 
@@ -220,6 +231,8 @@ namespace MyQbt
         {
             this.cbSettingSaveFolder.SuspendLayout();
             this.cbSettingSaveFolder.Items.Clear();
+            if (configData.SaveFolderList == null)
+                configData.SaveFolderList = new List<string>();
             this.cbSettingSaveFolder.Items.AddRange(configData.SaveFolderList.ToArray());
             if (this.cbSettingSaveFolder.Items.Count > 0)
                 this.cbSettingSaveFolder.SelectedIndex = 0;
