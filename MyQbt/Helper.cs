@@ -32,14 +32,26 @@ namespace MyQbt
         public static readonly char[] invalidChars1 =
             (new string(invalidChars)).Replace("\\", "").Replace("/", "").ToCharArray();
 
-        public static bool IsPathValid(string path)
+        public static bool IsPathValid(ref string path, bool isWindowsPath)
         {
-            path = string.Join("\\", path.Split(
-                new char[] { '/', '\\' },
-                StringSplitOptions.RemoveEmptyEntries));
-            return ((path[0] >= 'a' && path[0] <= 'z') || (path[0] >= 'A' && path[0] <= 'Z')) &&
-                (path[1] == ':') && (path[2] == '\\') &&
-                (path.Substring(3).IndexOfAny(invalidChars1) == -1);
+            if (isWindowsPath)
+            {
+                path = string.Join("\\", path.Split(
+                    new char[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries));
+                return ((path[0] >= 'a' && path[0] <= 'z') || (path[0] >= 'A' && path[0] <= 'Z')) &&
+                    (path[1] == ':') && (path[2] == '\\') &&
+                    (path.Substring(3).IndexOfAny(invalidChars1) == -1);
+            }
+            else
+            {
+                if (path[0] == '/' || path[0] == '\\')
+                {
+                    path = "/" + string.Join("/", path.Split(
+                        new char[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries));
+                    return true;
+                }
+                else return false;
+            }
         }
 
         public static bool IsNameValid(string name)
@@ -47,13 +59,18 @@ namespace MyQbt
             return (name.IndexOfAny(invalidChars) == -1);
         }
 
-        public static void ReplacePath(ref string path)
+        public static void ReplacePath(ref string path, bool isWindowsPath)
         {
-            path = string.Join("\\", path.Split(
+            string strTemp = "/";
+            path = string.Join(isWindowsPath ? "\\" : "/", path.Split(
                 new char[] { '/', '\\' },
                 StringSplitOptions.RemoveEmptyEntries));
-            string strTemp = path.Substring(0, 3);
-            path = path.Substring(3);
+
+            if (isWindowsPath)
+            {
+                strTemp = path.Substring(0, 3);
+                path = path.Substring(3);
+            }
 
             for (int i = 0; i < invalidChars1.Length; i++)
             {
@@ -65,6 +82,7 @@ namespace MyQbt
                 }
                 path = path.Replace(invalidChars1[i], replaceChar);
             }
+
             path = strTemp + path;
         }
 
@@ -82,9 +100,9 @@ namespace MyQbt
             }
         }
 
-        public static bool CheckPath(ref string path)
+        public static bool CheckPath(ref string path, bool isWindowsPath)
         {
-            if (IsPathValid(path)) return true;
+            if (IsPathValid(ref path, isWindowsPath)) return true;
 
             DialogResult dg = MessageBox.Show(
                 string.Format("\n{0}\n包含无效字符，要替换吗？\n{1}",
@@ -93,7 +111,7 @@ namespace MyQbt
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question); ;
             if (dg == DialogResult.Yes)
             {
-                ReplacePath(ref path);
+                ReplacePath(ref path, isWindowsPath);
                 return true;
             }
             else return false;

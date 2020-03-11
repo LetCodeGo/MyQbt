@@ -41,6 +41,7 @@ namespace MyQbt
         private void WinForm_Load(object sender, EventArgs e)
         {
             this.Icon = Properties.Resources.icon;
+            this.Text = String.Format("MyQbt [v{0}]", Application.ProductVersion);
             this.groupBoxAdd.Enabled = false;
             this.groupBoxOnlineOther.Enabled = false;
 
@@ -51,6 +52,7 @@ namespace MyQbt
             this.cbDiskMap.Checked = configData.IsDiskMap;
             this.cbDiskMap.CheckedChanged +=
                 CbSaveDiskOrFolder_SelectedIndexChanged;
+
             InitDomainCategoryDic();
 
             if (configData.LastUseUrl != null && configData.ConnectList != null)
@@ -83,6 +85,10 @@ namespace MyQbt
             InitComboxDiskFromAndComboxDiskTo();
             InitComboxSettingSaveFolder();
             CbSaveDiskOrFolder_SelectedIndexChanged(null, null);
+
+            this.rbWindows.Checked = (configData.QbtSystemType == Config.SystemType.Windows);
+            this.rbLinux.Checked = (!this.rbWindows.Checked);
+            if (this.rbLinux.Checked) this.cbSettingSaveFolder.Text = @"/mnt/test";
 
             if (configData.CategoryList != null)
             {
@@ -150,11 +156,14 @@ namespace MyQbt
             {
                 configData = new Config();
                 configData.IsDiskMap = false;
+                configData.QbtSystemType = Config.SystemType.Windows;
             }
         }
 
         private void SaveConfig()
         {
+            if (this.rbWindows.Checked) configData.QbtSystemType = Config.SystemType.Windows;
+            else configData.QbtSystemType = Config.SystemType.Linux;
             configData.IsDiskMap = this.cbDiskMap.Checked;
             configData.DiskMapString = Convert.ToBase64String(
                 Encoding.Default.GetBytes(this.rtbDiskMap.Text));
@@ -396,9 +405,10 @@ namespace MyQbt
 
         private async void BtnAddTorrent_Click(object sender, EventArgs e)
         {
+            bool isWindowsPath = this.rbWindows.Checked;
             string settingSaveFolder = this.cbSettingSaveFolder.Text;
 
-            if (!Helper.CheckPath(ref settingSaveFolder)) return;
+            if (!Helper.CheckPath(ref settingSaveFolder, isWindowsPath)) return;
             else this.cbSettingSaveFolder.Text = settingSaveFolder;
 
             OpenFileDialog dlg = new OpenFileDialog
@@ -458,6 +468,7 @@ namespace MyQbt
                                 torrentPath, bencodeTorrent, settingSaveFolder,
                                 this.cbSkipHashCheck.Checked,
                                 this.cbStartTorrent.Checked, category,
+                                isWindowsPath,
                                 actualToVirtualDic);
 
                             successList.Add(torrentPath);
@@ -473,7 +484,8 @@ namespace MyQbt
                         AddTorrentManual form = new AddTorrentManual(
                             torrentPath, bencodeTorrent, settingSaveFolder,
                             this.cbSkipHashCheck.Checked,
-                            this.cbStartTorrent.Checked, category, actualToVirtualDic)
+                            this.cbStartTorrent.Checked, category,
+                            isWindowsPath, actualToVirtualDic)
                         {
                             UpdataResultAndReason = this.UpdataManualAddResultAddReason
                         };
@@ -928,6 +940,30 @@ namespace MyQbt
             }
 
             MessageBox.Show("移动完成");
+        }
+
+        private void rbWindows_CheckedChanged(object sender, EventArgs e)
+        {
+            bool IsWindows = this.rbWindows.Checked;
+            string SavaFolder = this.cbSettingSaveFolder.Text;
+            bool IsFolderWindows =
+                (((SavaFolder[0] >= 'a' && SavaFolder[0] <= 'z') ||
+                (SavaFolder[0] >= 'A' && SavaFolder[0] <= 'Z')) &&
+                (SavaFolder[1] == ':'));
+            bool IsFolderLinux = (SavaFolder[0] == '/');
+            this.cbSaveDisk.Enabled = IsWindows;
+            this.cbSaveFolder.Enabled = IsWindows;
+            this.cbDiskMap.Enabled = IsWindows;
+            if (IsWindows)
+            {
+                if (!IsFolderWindows) CbSaveDiskOrFolder_SelectedIndexChanged(null, null);
+            }
+            else
+            {
+                this.cbSkipHashCheck.Checked = false;
+                if (!IsFolderLinux) this.cbSettingSaveFolder.Text = @"/mnt/test";
+            }
+            this.cbSkipHashCheck.Enabled = IsWindows;
         }
     }
 }

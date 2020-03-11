@@ -22,6 +22,8 @@ namespace MyQbt
         private string torrentPath;
         private string settingSaveFolder;
         private string defaultCategory;
+
+        private bool isWindowsPath;
         private Dictionary<string, string> actualToVirtualDic = null;
 
         private BencodeNET.Torrents.Torrent bencodeTorrent = null;
@@ -169,6 +171,7 @@ namespace MyQbt
             bool skipHashCheck,
             bool startTorrent,
             string category,
+            bool isWindowsPath,
             Dictionary<string, string> actualToVirtualDic = null)
         {
             InitializeComponent();
@@ -182,6 +185,7 @@ namespace MyQbt
             this.cbSkipHashCheck.Checked = skipHashCheck;
             this.cbStartTorrent.Checked = startTorrent;
             this.defaultCategory = category;
+            this.isWindowsPath = isWindowsPath;
             this.actualToVirtualDic = actualToVirtualDic;
         }
 
@@ -234,7 +238,7 @@ namespace MyQbt
         private async void BtnOK_Click(object sender, EventArgs e)
         {
             string s1 = this.tbSaveFolder.Text;
-            if (!Helper.CheckPath(ref s1)) return;
+            if (!Helper.CheckPath(ref s1, this.isWindowsPath)) return;
 
             string s2 = Path.GetFileName(s1);
 

@@ -29,6 +29,17 @@ namespace MyQbt
             [XmlAttribute("Category")]
             public string Category;
         }
+
+        public enum SystemType
+        {
+            [XmlEnum("Windows")]
+            Windows,
+            [XmlEnum("Linux")]
+            Linux
+        }
+
+        [XmlAttribute("QbtSystemType")]
+        public SystemType QbtSystemType;
         [XmlAttribute("IsDiskMap")]
         public bool IsDiskMap;
         [XmlAttribute("LastUseUrl")]

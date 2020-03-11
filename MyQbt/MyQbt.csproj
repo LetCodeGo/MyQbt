@@ -35,6 +35,9 @@
   <PropertyGroup>
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>MyQbt.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="BencodeNET, Version=2.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\BencodeNET.2.3.0\lib\net45\BencodeNET.dll</HintPath>

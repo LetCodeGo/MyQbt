@@ -60,6 +60,7 @@ namespace MyQbt
             string torrentPath, BencodeNET.Torrents.Torrent bencodeTorrent,
             string saveFolder, bool skipHashCheck,
             bool startTorrent, string category,
+            bool isWindowsPath,
             Dictionary<string, string> actualToVirtualDic = null)
         {
             if (bencodeTorrent != null)
@@ -75,7 +76,7 @@ namespace MyQbt
 
                 string strSaveFolderPath = Path.Combine(saveFolder, strTitle);
 
-                if (Helper.CheckPath(ref strSaveFolderPath))
+                if (Helper.CheckPath(ref strSaveFolderPath, isWindowsPath))
                 {
                     if (skipHashCheck)
                     {
