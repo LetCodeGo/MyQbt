@@ -36,16 +36,19 @@
             this.tabPageqBittorrentOnline = new System.Windows.Forms.TabPage();
             this.groupBoxOnlineOther = new System.Windows.Forms.GroupBox();
             this.btnGetCategoryAllTorrentSavePath = new System.Windows.Forms.Button();
-            this.groupBoxDiskMap = new System.Windows.Forms.GroupBox();
-            this.rtbDiskMap = new System.Windows.Forms.RichTextBox();
+            this.groupBoxPathMap = new System.Windows.Forms.GroupBox();
+            this.rtbPathMap = new System.Windows.Forms.RichTextBox();
             this.groupBoxAdd = new System.Windows.Forms.GroupBox();
+            this.groupBoxQbtSysytem = new System.Windows.Forms.GroupBox();
+            this.rbLinux = new System.Windows.Forms.RadioButton();
+            this.rbWindows = new System.Windows.Forms.RadioButton();
             this.cbSkipHashCheck = new System.Windows.Forms.CheckBox();
             this.cbCategory = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.cbStartTorrent = new System.Windows.Forms.CheckBox();
             this.btnAddTorrent = new System.Windows.Forms.Button();
             this.groupBoxAddSaveFolder = new System.Windows.Forms.GroupBox();
-            this.cbDiskMap = new System.Windows.Forms.CheckBox();
+            this.cbPathMap = new System.Windows.Forms.CheckBox();
             this.cbSettingSaveFolder = new System.Windows.Forms.ComboBox();
             this.cbSaveFolder = new System.Windows.Forms.ComboBox();
             this.cbSaveDisk = new System.Windows.Forms.ComboBox();
@@ -72,14 +75,12 @@
             this.cbDiskTo = new System.Windows.Forms.ComboBox();
             this.cbDiskFrom = new System.Windows.Forms.ComboBox();
             this.tabPageµTorrentOffline = new System.Windows.Forms.TabPage();
-            this.groupBoxQbtSysytem = new System.Windows.Forms.GroupBox();
-            this.rbLinux = new System.Windows.Forms.RadioButton();
-            this.rbWindows = new System.Windows.Forms.RadioButton();
             this.tabControl.SuspendLayout();
             this.tabPageqBittorrentOnline.SuspendLayout();
             this.groupBoxOnlineOther.SuspendLayout();
-            this.groupBoxDiskMap.SuspendLayout();
+            this.groupBoxPathMap.SuspendLayout();
             this.groupBoxAdd.SuspendLayout();
+            this.groupBoxQbtSysytem.SuspendLayout();
             this.groupBoxAddSaveFolder.SuspendLayout();
             this.groupBoxAddType.SuspendLayout();
             this.groupBoxLogin.SuspendLayout();
@@ -87,7 +88,6 @@
             this.groupBoxOfflineOther.SuspendLayout();
             this.groupBoxTrackers.SuspendLayout();
             this.groupBoxModifyDisk.SuspendLayout();
-            this.groupBoxQbtSysytem.SuspendLayout();
             this.SuspendLayout();
             // 
             // cbUrl
@@ -148,7 +148,7 @@
             // tabPageqBittorrentOnline
             // 
             this.tabPageqBittorrentOnline.Controls.Add(this.groupBoxOnlineOther);
-            this.tabPageqBittorrentOnline.Controls.Add(this.groupBoxDiskMap);
+            this.tabPageqBittorrentOnline.Controls.Add(this.groupBoxPathMap);
             this.tabPageqBittorrentOnline.Controls.Add(this.groupBoxAdd);
             this.tabPageqBittorrentOnline.Controls.Add(this.groupBoxLogin);
             this.tabPageqBittorrentOnline.Location = new System.Drawing.Point(4, 22);
@@ -179,25 +179,25 @@
             this.btnGetCategoryAllTorrentSavePath.UseVisualStyleBackColor = true;
             this.btnGetCategoryAllTorrentSavePath.Click += new System.EventHandler(this.BtnGetCategoryAllTorrentSavePath_Click);
             // 
-            // groupBoxDiskMap
+            // groupBoxPathMap
             // 
-            this.groupBoxDiskMap.Controls.Add(this.rtbDiskMap);
-            this.groupBoxDiskMap.Location = new System.Drawing.Point(8, 130);
-            this.groupBoxDiskMap.Name = "groupBoxDiskMap";
-            this.groupBoxDiskMap.Size = new System.Drawing.Size(270, 286);
-            this.groupBoxDiskMap.TabIndex = 6;
-            this.groupBoxDiskMap.TabStop = false;
-            this.groupBoxDiskMap.Text = "磁盘映射(前映射到后)";
+            this.groupBoxPathMap.Controls.Add(this.rtbPathMap);
+            this.groupBoxPathMap.Location = new System.Drawing.Point(8, 130);
+            this.groupBoxPathMap.Name = "groupBoxPathMap";
+            this.groupBoxPathMap.Size = new System.Drawing.Size(270, 286);
+            this.groupBoxPathMap.TabIndex = 6;
+            this.groupBoxPathMap.TabStop = false;
+            this.groupBoxPathMap.Text = "路径映射（前为本机路径，后为远程路径）";
             // 
-            // rtbDiskMap
+            // rtbPathMap
             // 
-            this.rtbDiskMap.DetectUrls = false;
-            this.rtbDiskMap.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.rtbDiskMap.Location = new System.Drawing.Point(3, 17);
-            this.rtbDiskMap.Name = "rtbDiskMap";
-            this.rtbDiskMap.Size = new System.Drawing.Size(264, 266);
-            this.rtbDiskMap.TabIndex = 0;
-            this.rtbDiskMap.Text = "";
+            this.rtbPathMap.DetectUrls = false;
+            this.rtbPathMap.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rtbPathMap.Location = new System.Drawing.Point(3, 17);
+            this.rtbPathMap.Name = "rtbPathMap";
+            this.rtbPathMap.Size = new System.Drawing.Size(264, 266);
+            this.rtbPathMap.TabIndex = 0;
+            this.rtbPathMap.Text = "";
             // 
             // groupBoxAdd
             // 
@@ -216,14 +216,47 @@
             this.groupBoxAdd.TabStop = false;
             this.groupBoxAdd.Text = "添加种子";
             // 
+            // groupBoxQbtSysytem
+            // 
+            this.groupBoxQbtSysytem.Controls.Add(this.rbLinux);
+            this.groupBoxQbtSysytem.Controls.Add(this.rbWindows);
+            this.groupBoxQbtSysytem.Location = new System.Drawing.Point(6, 16);
+            this.groupBoxQbtSysytem.Name = "groupBoxQbtSysytem";
+            this.groupBoxQbtSysytem.Size = new System.Drawing.Size(488, 48);
+            this.groupBoxQbtSysytem.TabIndex = 9;
+            this.groupBoxQbtSysytem.TabStop = false;
+            this.groupBoxQbtSysytem.Text = "qBittorrent 所在系统（此项影响对路径的检测判断）";
+            // 
+            // rbLinux
+            // 
+            this.rbLinux.AutoSize = true;
+            this.rbLinux.Location = new System.Drawing.Point(252, 20);
+            this.rbLinux.Name = "rbLinux";
+            this.rbLinux.Size = new System.Drawing.Size(185, 16);
+            this.rbLinux.TabIndex = 2;
+            this.rbLinux.Text = "Linux（路径类似 /mnt/test）";
+            this.rbLinux.UseVisualStyleBackColor = true;
+            // 
+            // rbWindows
+            // 
+            this.rbWindows.AutoSize = true;
+            this.rbWindows.Checked = true;
+            this.rbWindows.Location = new System.Drawing.Point(6, 20);
+            this.rbWindows.Name = "rbWindows";
+            this.rbWindows.Size = new System.Drawing.Size(185, 16);
+            this.rbWindows.TabIndex = 0;
+            this.rbWindows.TabStop = true;
+            this.rbWindows.Text = "Windows（路径类似 C:\\test）";
+            this.rbWindows.UseVisualStyleBackColor = true;
+            // 
             // cbSkipHashCheck
             // 
             this.cbSkipHashCheck.AutoSize = true;
             this.cbSkipHashCheck.Location = new System.Drawing.Point(12, 224);
             this.cbSkipHashCheck.Name = "cbSkipHashCheck";
-            this.cbSkipHashCheck.Size = new System.Drawing.Size(288, 16);
+            this.cbSkipHashCheck.Size = new System.Drawing.Size(294, 16);
             this.cbSkipHashCheck.TabIndex = 8;
-            this.cbSkipHashCheck.Text = "Skip Hask Check (Checked Only On File Exist)";
+            this.cbSkipHashCheck.Text = "Skip Hask Check（Checked Only On File Exist）";
             this.cbSkipHashCheck.UseVisualStyleBackColor = true;
             // 
             // cbCategory
@@ -265,7 +298,7 @@
             // 
             // groupBoxAddSaveFolder
             // 
-            this.groupBoxAddSaveFolder.Controls.Add(this.cbDiskMap);
+            this.groupBoxAddSaveFolder.Controls.Add(this.cbPathMap);
             this.groupBoxAddSaveFolder.Controls.Add(this.cbSettingSaveFolder);
             this.groupBoxAddSaveFolder.Controls.Add(this.cbSaveFolder);
             this.groupBoxAddSaveFolder.Controls.Add(this.cbSaveDisk);
@@ -276,15 +309,15 @@
             this.groupBoxAddSaveFolder.TabStop = false;
             this.groupBoxAddSaveFolder.Text = "保存文件夹";
             // 
-            // cbDiskMap
+            // cbPathMap
             // 
-            this.cbDiskMap.AutoSize = true;
-            this.cbDiskMap.Location = new System.Drawing.Point(6, 46);
-            this.cbDiskMap.Name = "cbDiskMap";
-            this.cbDiskMap.Size = new System.Drawing.Size(240, 16);
-            this.cbDiskMap.TabIndex = 3;
-            this.cbDiskMap.Text = "磁盘映射(网络磁盘名映射为实际磁盘名)";
-            this.cbDiskMap.UseVisualStyleBackColor = true;
+            this.cbPathMap.AutoSize = true;
+            this.cbPathMap.Location = new System.Drawing.Point(6, 46);
+            this.cbPathMap.Name = "cbPathMap";
+            this.cbPathMap.Size = new System.Drawing.Size(252, 16);
+            this.cbPathMap.TabIndex = 3;
+            this.cbPathMap.Text = "磁盘映射（网络磁盘名映射为实际磁盘名）";
+            this.cbPathMap.UseVisualStyleBackColor = true;
             // 
             // cbSettingSaveFolder
             // 
@@ -557,40 +590,6 @@
             this.tabPageµTorrentOffline.Text = "µTorrent 离线";
             this.tabPageµTorrentOffline.UseVisualStyleBackColor = true;
             // 
-            // groupBoxQbtSysytem
-            // 
-            this.groupBoxQbtSysytem.Controls.Add(this.rbLinux);
-            this.groupBoxQbtSysytem.Controls.Add(this.rbWindows);
-            this.groupBoxQbtSysytem.Location = new System.Drawing.Point(6, 16);
-            this.groupBoxQbtSysytem.Name = "groupBoxQbtSysytem";
-            this.groupBoxQbtSysytem.Size = new System.Drawing.Size(488, 48);
-            this.groupBoxQbtSysytem.TabIndex = 9;
-            this.groupBoxQbtSysytem.TabStop = false;
-            this.groupBoxQbtSysytem.Text = "qBittorrent 所在系统（此项影响对路径的检测判断）";
-            // 
-            // rbLinux
-            // 
-            this.rbLinux.AutoSize = true;
-            this.rbLinux.Location = new System.Drawing.Point(252, 20);
-            this.rbLinux.Name = "rbLinux";
-            this.rbLinux.Size = new System.Drawing.Size(185, 16);
-            this.rbLinux.TabIndex = 2;
-            this.rbLinux.Text = "Linux（路径类似 /mnt/test）";
-            this.rbLinux.UseVisualStyleBackColor = true;
-            // 
-            // rbWindows
-            // 
-            this.rbWindows.AutoSize = true;
-            this.rbWindows.Checked = true;
-            this.rbWindows.Location = new System.Drawing.Point(6, 20);
-            this.rbWindows.Name = "rbWindows";
-            this.rbWindows.Size = new System.Drawing.Size(185, 16);
-            this.rbWindows.TabIndex = 0;
-            this.rbWindows.TabStop = true;
-            this.rbWindows.Text = "Windows（路径类似 C:\\test）";
-            this.rbWindows.UseVisualStyleBackColor = true;
-            this.rbWindows.CheckedChanged += new System.EventHandler(this.rbWindows_CheckedChanged);
-            // 
             // WinForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -607,9 +606,11 @@
             this.tabControl.ResumeLayout(false);
             this.tabPageqBittorrentOnline.ResumeLayout(false);
             this.groupBoxOnlineOther.ResumeLayout(false);
-            this.groupBoxDiskMap.ResumeLayout(false);
+            this.groupBoxPathMap.ResumeLayout(false);
             this.groupBoxAdd.ResumeLayout(false);
             this.groupBoxAdd.PerformLayout();
+            this.groupBoxQbtSysytem.ResumeLayout(false);
+            this.groupBoxQbtSysytem.PerformLayout();
             this.groupBoxAddSaveFolder.ResumeLayout(false);
             this.groupBoxAddSaveFolder.PerformLayout();
             this.groupBoxAddType.ResumeLayout(false);
@@ -622,8 +623,6 @@
             this.groupBoxTrackers.PerformLayout();
             this.groupBoxModifyDisk.ResumeLayout(false);
             this.groupBoxModifyDisk.PerformLayout();
-            this.groupBoxQbtSysytem.ResumeLayout(false);
-            this.groupBoxQbtSysytem.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -659,9 +658,9 @@
         private System.Windows.Forms.Button btnTrackerFindAndReplace;
         private System.Windows.Forms.ComboBox cbTrackerReplace;
         private System.Windows.Forms.ComboBox cbTrackerFind;
-        private System.Windows.Forms.GroupBox groupBoxDiskMap;
-        private System.Windows.Forms.RichTextBox rtbDiskMap;
-        private System.Windows.Forms.CheckBox cbDiskMap;
+        private System.Windows.Forms.GroupBox groupBoxPathMap;
+        private System.Windows.Forms.RichTextBox rtbPathMap;
+        private System.Windows.Forms.CheckBox cbPathMap;
         private System.Windows.Forms.CheckBox cbTorrentNeverStart;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox cbFindCategory;

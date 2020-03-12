@@ -49,9 +49,12 @@ namespace MyQbt
             this.buttonOther.Visible = false;
 
             LoadConfig();
-            this.cbDiskMap.Checked = configData.IsDiskMap;
-            this.cbDiskMap.CheckedChanged +=
+            this.cbPathMap.Checked = configData.IsPathMap;
+            this.cbPathMap.CheckedChanged +=
                 CbSaveDiskOrFolder_SelectedIndexChanged;
+
+            this.rbWindows.Checked = (configData.QbtSystemType == Config.SystemType.Windows);
+            this.rbLinux.Checked = (!this.rbWindows.Checked);
 
             InitDomainCategoryDic();
 
@@ -73,22 +76,18 @@ namespace MyQbt
                     this.tbPassword.Text = Helper.Decrypt(c1.Password);
                 }
             }
-            if (configData.DiskMapString == null)
-                this.rtbDiskMap.Text =
+            if (configData.PathMapString == null)
+                this.rtbPathMap.Text =
                     "L:\\|D:\\\nM:\\|E:\\\nN:\\|F:\\\nO:\\|G:\\\n" +
                     "P:\\|H:\\\nQ:\\|I:\\\nR:\\|J:\\";
-            else this.rtbDiskMap.Text = Encoding.Default.GetString(
-                Convert.FromBase64String(configData.DiskMapString));
+            else this.rtbPathMap.Text = Encoding.Default.GetString(
+                Convert.FromBase64String(configData.PathMapString));
 
             InitComboxSaveDisk();
             InitComboxSaveFolder();
             InitComboxDiskFromAndComboxDiskTo();
             InitComboxSettingSaveFolder();
             CbSaveDiskOrFolder_SelectedIndexChanged(null, null);
-
-            this.rbWindows.Checked = (configData.QbtSystemType == Config.SystemType.Windows);
-            this.rbLinux.Checked = (!this.rbWindows.Checked);
-            if (this.rbLinux.Checked) this.cbSettingSaveFolder.Text = @"/mnt/test";
 
             if (configData.CategoryList != null)
             {
@@ -106,8 +105,8 @@ namespace MyQbt
             this.cbTrackerFind.SelectedIndex = 0;
             this.cbTrackerReplace.SelectedIndex = 0;
 
-            µTorrentOfflineUserControl utc = new µTorrentOfflineUserControl();
-            utc.Dock = DockStyle.Fill;
+            µTorrentOfflineUserControl utc = new µTorrentOfflineUserControl()
+            { Dock = DockStyle.Fill };
             this.CheckµTorrentNeedSave = utc.CheckNeedSaveWhenFormClosing;
             this.tabPageµTorrentOffline.Controls.Add(utc);
         }
@@ -154,9 +153,11 @@ namespace MyQbt
             }
             if (configData == null)
             {
-                configData = new Config();
-                configData.IsDiskMap = false;
-                configData.QbtSystemType = Config.SystemType.Windows;
+                configData = new Config()
+                {
+                    IsPathMap = false,
+                    QbtSystemType = Config.SystemType.Windows
+                };
             }
         }
 
@@ -164,9 +165,9 @@ namespace MyQbt
         {
             if (this.rbWindows.Checked) configData.QbtSystemType = Config.SystemType.Windows;
             else configData.QbtSystemType = Config.SystemType.Linux;
-            configData.IsDiskMap = this.cbDiskMap.Checked;
-            configData.DiskMapString = Convert.ToBase64String(
-                Encoding.Default.GetBytes(this.rtbDiskMap.Text));
+            configData.IsPathMap = this.cbPathMap.Checked;
+            configData.PathMapString = Convert.ToBase64String(
+                Encoding.Default.GetBytes(this.rtbPathMap.Text));
 
             configData.LastUseCategory = this.cbFindCategory.Text;
             if (configData.CategoryList == null) configData.CategoryList = new List<string>();
@@ -276,33 +277,57 @@ namespace MyQbt
             this.cbDiskTo.ResumeLayout();
         }
 
-        private Dictionary<string, string> GetVirtualToActualDiskMap()
+        private Dictionary<string, string> GetVirtualToActualPathMap()
         {
-            string[] strMaps = this.rtbDiskMap.Text.ToUpper().Split(
+            string[] strMaps = this.rtbPathMap.Text.Split(
                 new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-            Dictionary<string, string> virtualToActualDiskMapDic =
+            Dictionary<string, string> virtualToActualPathMapDic =
                 new Dictionary<string, string>();
 
             foreach (string strMap in strMaps)
             {
                 string[] ss = strMap.Split(
                     new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-                if (ss == null) continue;
+                if (ss == null || ss.Length != 2) continue;
 
-                for (int i = 0; i < ss.Length; i++) ss[i] = ss[i].ToUpper().Trim();
-
-                if (ss.Length == 2 && ss[0].EndsWith("\\") && ss[1].EndsWith("\\"))
+                // ss[0] 只能为windows路径
+                ss[0] = ss[0].Trim();
+                if (ss[0].Length >= 2 &&
+                    ((ss[0][0] >= 'a' && ss[0][0] <= 'z') || (ss[0][0] >= 'A' && ss[0][0] <= 'Z')) &&
+                     (ss[0][1] == ':'))
                 {
-                    if (virtualToActualDiskMapDic.ContainsKey(ss[0]))
-                    {
-                        virtualToActualDiskMapDic[ss[0]] = ss[1];
-                    }
-                    else virtualToActualDiskMapDic.Add(ss[0], ss[1]);
+                    ss[0] = string.Join("\\", ss[0].Split(
+                        new char[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries));
+                    if (!ss[0].EndsWith("\\")) ss[0] = ss[0] + "\\";
                 }
+                else continue;
+
+                ss[1] = ss[1].Trim();
+                if (ss[1].Length >= 1 && (ss[1][0] == '/' || ss[1][0] == '\\'))
+                {
+                    ss[1] = "/" + string.Join("/", ss[1].Split(
+                        new char[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries));
+                    if (!ss[1].EndsWith("/")) ss[1] = ss[1] + "/";
+                }
+                else if (ss[1].Length >= 2 &&
+                    ((ss[1][0] >= 'a' && ss[1][0] <= 'z') || (ss[1][0] >= 'A' && ss[1][0] <= 'Z')) &&
+                     (ss[1][1] == ':'))
+                {
+                    ss[1] = string.Join("\\", ss[1].Split(
+                        new char[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries));
+                    if (!ss[1].EndsWith("\\")) ss[1] = ss[1] + "\\";
+                }
+                else continue;
+
+                if (virtualToActualPathMapDic.ContainsKey(ss[0]))
+                {
+                    virtualToActualPathMapDic[ss[0]] = ss[1];
+                }
+                else virtualToActualPathMapDic.Add(ss[0], ss[1]);
             }
 
-            return virtualToActualDiskMapDic;
+            return virtualToActualPathMapDic;
         }
 
         private void CbUrl_SelectedIndexChanged(object sender, EventArgs e)
@@ -326,18 +351,20 @@ namespace MyQbt
             string str1 = this.cbSaveDisk.Text.Substring(0, 3);
             int index2 = this.cbSaveFolder.Text.LastIndexOf('(');
             string str2 = this.cbSaveFolder.Text.Substring(0, index2 - 1).Trim();
-            string strTemp = Path.Combine(str1, str2).ToUpper();
+            string strTemp = Path.Combine(str1, str2);
 
-            if (this.cbDiskMap.Checked)
+            if (this.cbPathMap.Checked)
             {
-                Dictionary<string, string> virtualToActualDiskMapDic =
-                    GetVirtualToActualDiskMap();
-                foreach (KeyValuePair<string, string> kv in virtualToActualDiskMapDic)
+                Dictionary<string, string> virtualToActualPathMapDic =
+                    GetVirtualToActualPathMap();
+                foreach (KeyValuePair<string, string> kv in virtualToActualPathMapDic)
                 {
-                    int index = strTemp.IndexOf(kv.Key);
+                    int index = strTemp.IndexOf(kv.Key, StringComparison.OrdinalIgnoreCase);
                     if (index == 0)
                     {
-                        strTemp = kv.Value + strTemp.Substring(kv.Key.Length);
+                        if (kv.Value[0] == '/')
+                            strTemp = kv.Value + strTemp.Substring(kv.Key.Length).Replace('\\', '/');
+                        else strTemp = kv.Value + strTemp.Substring(kv.Key.Length);
                         break;
                     }
                 }
@@ -419,14 +446,19 @@ namespace MyQbt
 
             if (dlg.ShowDialog() == DialogResult.OK)
             {
-                Dictionary<string, string> virtualToActualDic = GetVirtualToActualDiskMap();
+                Dictionary<string, string> virtualToActualDic = GetVirtualToActualPathMap();
                 Dictionary<string, string> actualToVirtualDic = null;
-                if (this.cbDiskMap.Checked)
+                if (this.cbPathMap.Checked)
                 {
                     actualToVirtualDic = new Dictionary<string, string>();
                     foreach (KeyValuePair<string, string> kv in virtualToActualDic)
                     {
-                        actualToVirtualDic.Add(kv.Value, kv.Key);
+                        if (actualToVirtualDic.ContainsKey(kv.Value))
+                        {
+                            MessageBox.Show(String.Format("多个路径映射到\n{0}", kv.Value));
+                            return;
+                        }
+                        else actualToVirtualDic.Add(kv.Value, kv.Key);
                     }
                 }
 
@@ -825,8 +857,8 @@ namespace MyQbt
                 actionDirectory, "*.fastresume", SearchOption.AllDirectories);
 
             var parser = new BencodeNET.Parsing.BencodeParser();
-            BencodeNET.Objects.BString categoryBString =
-                new BencodeNET.Objects.BString("qBt-category");
+            //BencodeNET.Objects.BString categoryBString =
+            //    new BencodeNET.Objects.BString("qBt-category");
             BencodeNET.Objects.BString qnameBString =
                 new BencodeNET.Objects.BString("qBt-name");
             BencodeNET.Objects.BString qspBString =
@@ -940,30 +972,6 @@ namespace MyQbt
             }
 
             MessageBox.Show("移动完成");
-        }
-
-        private void rbWindows_CheckedChanged(object sender, EventArgs e)
-        {
-            bool IsWindows = this.rbWindows.Checked;
-            string SavaFolder = this.cbSettingSaveFolder.Text;
-            bool IsFolderWindows =
-                (((SavaFolder[0] >= 'a' && SavaFolder[0] <= 'z') ||
-                (SavaFolder[0] >= 'A' && SavaFolder[0] <= 'Z')) &&
-                (SavaFolder[1] == ':'));
-            bool IsFolderLinux = (SavaFolder[0] == '/');
-            this.cbSaveDisk.Enabled = IsWindows;
-            this.cbSaveFolder.Enabled = IsWindows;
-            this.cbDiskMap.Enabled = IsWindows;
-            if (IsWindows)
-            {
-                if (!IsFolderWindows) CbSaveDiskOrFolder_SelectedIndexChanged(null, null);
-            }
-            else
-            {
-                this.cbSkipHashCheck.Checked = false;
-                if (!IsFolderLinux) this.cbSettingSaveFolder.Text = @"/mnt/test";
-            }
-            this.cbSkipHashCheck.Enabled = IsWindows;
         }
     }
 }

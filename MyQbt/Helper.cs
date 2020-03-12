@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -201,19 +202,24 @@ namespace MyQbt
             }
         }
 
+        /// <summary>
+        /// 获取虚拟路径（被映射过的路径，本机路径，Windows路径）
+        /// </summary>
+        /// <param name="actualPath"></param>
+        /// <param name="actualToVirtualDic"></param>
+        /// <returns></returns>
         public static string GetVirtualPath(string actualPath,
             Dictionary<string, string> actualToVirtualDic)
         {
             if (actualToVirtualDic == null) return actualPath;
 
-            string strTemp = actualPath.ToUpper();
-
             foreach (KeyValuePair<string, string> kv in actualToVirtualDic)
             {
-                int index = strTemp.IndexOf(kv.Key);
+                int index = actualPath.IndexOf(kv.Key, StringComparison.OrdinalIgnoreCase);
                 if (index == 0)
                 {
-                    return kv.Value + strTemp.Substring(kv.Key.Length);
+                    Debug.Assert(((kv.Value[0] >= 'a' && kv.Value[0] <= 'z') || (kv.Value[0] >= 'A' && kv.Value[0] <= 'Z')) && (kv.Value[1] == ':'));
+                    return kv.Value + actualPath.Substring(kv.Key.Length).Replace('/', '\\');
                 }
             }
 

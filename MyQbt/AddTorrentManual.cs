@@ -205,17 +205,19 @@ namespace MyQbt
                 bencodeTorrent.Trackers.ToArray(),
                 x => this.trackerList.AddRange(x));
 
+            string delimiter = "/";
+            if (this.isWindowsPath) delimiter = "\\";
             if (bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single)
             {
-                this.tbSaveFolder.Text = Path.Combine(
-                    this.settingSaveFolder,
-                    Path.GetFileNameWithoutExtension(bencodeTorrent.DisplayName));
+                this.tbSaveFolder.Text = this.settingSaveFolder + delimiter +
+                    Path.GetFileNameWithoutExtension(bencodeTorrent.DisplayName);
             }
             else
             {
-                this.tbSaveFolder.Text = Path.Combine(
-                    this.settingSaveFolder, bencodeTorrent.DisplayName);
+                this.tbSaveFolder.Text = this.settingSaveFolder + delimiter +
+                    bencodeTorrent.DisplayName;
             }
+
             this.labelName.Text = bencodeTorrent.DisplayName;
             this.labelComment.Text = bencodeTorrent.Comment;
             this.labelSize.Text = Helper.GetSizeString(bencodeTorrent.TotalSize);

@@ -74,7 +74,7 @@ namespace MyQbt
                     AddDotOrBlank(strTitle) +
                     strTitle;
 
-                string strSaveFolderPath = Path.Combine(saveFolder, strTitle);
+                string strSaveFolderPath = saveFolder + (isWindowsPath ? "\\" : "/") + strTitle;
 
                 if (Helper.CheckPath(ref strSaveFolderPath, isWindowsPath))
                 {

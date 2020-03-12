@@ -40,8 +40,8 @@ namespace MyQbt
 
         [XmlAttribute("QbtSystemType")]
         public SystemType QbtSystemType;
-        [XmlAttribute("IsDiskMap")]
-        public bool IsDiskMap;
+        [XmlAttribute("IsPathMap")]
+        public bool IsPathMap;
         [XmlAttribute("LastUseUrl")]
         public string LastUseUrl;
         [XmlArray("ConnectList")]
@@ -58,7 +58,7 @@ namespace MyQbt
         [XmlArray("SaveFolderList")]
         public List<string> SaveFolderList;
 
-        [XmlElement("DiskMapString")]
-        public string DiskMapString;
+        [XmlElement("PathMapString")]
+        public string PathMapString;
     }
 }
