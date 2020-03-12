@@ -7,7 +7,7 @@
 4、辅种功能（勾选跳过hash检测时，检测文件名及大小是否相同，两项都一致可认为是相同文件）  
 5、移除实际文件已不存在的种子  
 
-## qBittorrent在线功能（需qBittorrent开启Web用户界面）
+## qBittorrent在线功能（需qBittorrent开启Web用户界面，qBittorrent v4.1+以上版本）
 
 ![image](https://github.com/LetCodeGo/MyQbt/blob/master/Images/qBittorrent_online_main.png)
 
