@@ -79,7 +79,7 @@ namespace MyQbt
             if (configData.PathMapString == null)
                 this.rtbPathMap.Text =
                     "L:\\|D:\\\nM:\\|E:\\\nN:\\|F:\\\nO:\\|G:\\\n" +
-                    "P:\\|H:\\\nQ:\\|I:\\\nR:\\|J:\\";
+                    "P:\\|H:\\\nQ:\\|I:\\\nR:\\|J:\\\nZ:\\|/mnt/test/";
             else this.rtbPathMap.Text = Encoding.Default.GetString(
                 Convert.FromBase64String(configData.PathMapString));
 
@@ -843,8 +843,7 @@ namespace MyQbt
                     (i + 1).ToString().PadLeft(digitLen, '0'), logList[i]);
             }
 
-            InfoForm form = new InfoForm(
-                "Disk Change Log", strLog);
+            InfoForm form = new InfoForm("Disk Change Log", strLog);
             form.ShowDialog();
         }
 

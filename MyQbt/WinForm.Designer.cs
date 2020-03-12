@@ -314,9 +314,9 @@
             this.cbPathMap.AutoSize = true;
             this.cbPathMap.Location = new System.Drawing.Point(6, 46);
             this.cbPathMap.Name = "cbPathMap";
-            this.cbPathMap.Size = new System.Drawing.Size(252, 16);
+            this.cbPathMap.Size = new System.Drawing.Size(264, 16);
             this.cbPathMap.TabIndex = 3;
-            this.cbPathMap.Text = "磁盘映射（网络磁盘名映射为实际磁盘名）";
+            this.cbPathMap.Text = "路径映射（本地路径映射为远程计算机路径）";
             this.cbPathMap.UseVisualStyleBackColor = true;
             // 
             // cbSettingSaveFolder
