@@ -400,7 +400,7 @@
             this.groupBoxLogin.Size = new System.Drawing.Size(270, 118);
             this.groupBoxLogin.TabIndex = 4;
             this.groupBoxLogin.TabStop = false;
-            this.groupBoxLogin.Text = "登陆";
+            this.groupBoxLogin.Text = "登陆（qBittorrent v4.1+）";
             // 
             // cbKeepConnectSetting
             // 
