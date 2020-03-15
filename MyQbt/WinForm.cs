@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
@@ -73,7 +68,14 @@ namespace MyQbt
                 if (c1 != null)
                 {
                     this.tbUser.Text = c1.User;
-                    this.tbPassword.Text = Helper.Decrypt(c1.Password);
+                    string decryptedPassword = "";
+                    try { decryptedPassword = Helper.Decrypt(c1.Password); }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(string.Format(
+                            "密码解密失败，请重新设置密码！\n{0}\n配置文件复制到另一电脑会导致此问题", ex.Message));
+                    }
+                    this.tbPassword.Text = decryptedPassword;
                 }
             }
             if (configData.PathMapString == null)
@@ -337,7 +339,14 @@ namespace MyQbt
             if (c1 != null)
             {
                 this.tbUser.Text = c1.User;
-                this.tbPassword.Text = Helper.Decrypt(c1.Password);
+                string decryptedPassword = "";
+                try { decryptedPassword = Helper.Decrypt(c1.Password); }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(string.Format(
+                        "密码解密失败，请重新设置密码！\n{0}\n配置文件复制到另一电脑会导致此问题", ex.Message));
+                }
+                this.tbPassword.Text = decryptedPassword;
             }
         }
 
@@ -403,14 +412,14 @@ namespace MyQbt
                 {
                     Config.Connect c1 = configData.ConnectList.Find(
                         x => x.Url == this.cbUrl.Text);
-                    string sp = Helper.Encryption(this.tbPassword.Text);
+                    string encryptedPassword = Helper.Encryption(this.tbPassword.Text);
                     if (c1 == null)
                     {
                         c1 = new Config.Connect
                         {
                             Url = this.cbUrl.Text,
                             User = this.tbUser.Text,
-                            Password = sp
+                            Password = encryptedPassword
                         };
                         configData.ConnectList.Add(c1);
                         this.cbUrl.Items.Add(this.cbUrl.Text);
@@ -418,7 +427,7 @@ namespace MyQbt
                     else
                     {
                         c1.User = this.tbUser.Text;
-                        c1.Password = sp;
+                        c1.Password = encryptedPassword;
                     }
                 }
             }
