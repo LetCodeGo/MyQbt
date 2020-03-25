@@ -60,5 +60,17 @@ namespace MyQbt
 
         [XmlElement("PathMapString")]
         public string PathMapString;
+
+        [XmlArray("TrackerFindList")]
+        public List<string> TrackerFindList;
+
+        [XmlArray("TrackerReplaceList")]
+        public List<string> TrackerReplaceList;
+
+        [XmlArray("SavePathFindList")]
+        public List<string> SavePathFindList;
+
+        [XmlArray("SavePathReplaceList")]
+        public List<string> SavePathReplaceList;
     }
 }

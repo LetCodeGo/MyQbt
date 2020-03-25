@@ -87,7 +87,8 @@ namespace MyQbt
 
             InitComboxSaveDisk();
             InitComboxSaveFolder();
-            InitComboxDiskFromAndComboxDiskTo();
+            InitComboxTrackFindAndReplace();
+            InitComboxSavePathFindAndReplace();
             InitComboxSettingSaveFolder();
             CbSaveDiskOrFolder_SelectedIndexChanged(null, null);
 
@@ -261,22 +262,96 @@ namespace MyQbt
             this.cbCategory.ResumeLayout();
         }
 
-        private void InitComboxDiskFromAndComboxDiskTo()
+        private void InitComboxTrackFindAndReplace()
         {
-            this.cbDiskFrom.SuspendLayout();
-            this.cbDiskTo.SuspendLayout();
-            this.cbDiskFrom.Items.Clear();
-            this.cbDiskTo.Items.Clear();
-            for (int i = 0; i < 26; i++)
+            if (this.configData.TrackerFindList == null ||
+                this.configData.TrackerFindList.Count == 0)
             {
-                char ch = Convert.ToChar('A' + i);
-                this.cbDiskFrom.Items.Add(ch);
-                this.cbDiskTo.Items.Add(ch);
+                this.configData.TrackerFindList = new List<string>();
+                this.configData.TrackerFindList.Add("http:");
             }
-            this.cbDiskFrom.SelectedIndex = 2;
-            this.cbDiskTo.SelectedIndex = 2;
-            this.cbDiskFrom.ResumeLayout();
-            this.cbDiskTo.ResumeLayout();
+            if (this.configData.TrackerReplaceList == null ||
+                this.configData.TrackerReplaceList.Count == 0)
+            {
+                this.configData.TrackerReplaceList = new List<string>();
+                this.configData.TrackerReplaceList.Add("https:");
+            }
+
+            this.cbTrackerFind.SuspendLayout();
+            this.cbTrackerReplace.SuspendLayout();
+            this.cbTrackerFind.Items.Clear();
+            this.cbTrackerReplace.Items.Clear();
+
+            this.cbTrackerFind.Items.AddRange(this.configData.TrackerFindList.ToArray());
+            this.cbTrackerReplace.Items.AddRange(this.configData.TrackerReplaceList.ToArray());
+            this.cbTrackerFind.SelectedItem = this.configData.TrackerFindList[0];
+            this.cbTrackerReplace.SelectedItem = this.configData.TrackerReplaceList[0];
+
+            this.cbTrackerFind.ResumeLayout();
+            this.cbTrackerReplace.ResumeLayout();
+        }
+
+        private void UpdataComboxTrackFindAndReplace(string trackerFind, string trackerReplace)
+        {
+            configData.TrackerFindList.Remove(trackerFind);
+            configData.TrackerFindList.Insert(0, trackerFind);
+            if (configData.TrackerFindList.Count > 30)
+                configData.TrackerFindList.RemoveRange(
+                    30, configData.TrackerFindList.Count - 30);
+
+            configData.TrackerReplaceList.Remove(trackerReplace);
+            configData.TrackerReplaceList.Insert(0, trackerReplace);
+            if (configData.TrackerReplaceList.Count > 30)
+                configData.TrackerReplaceList.RemoveRange(
+                    30, configData.TrackerReplaceList.Count - 30);
+
+            InitComboxTrackFindAndReplace();
+        }
+
+        private void InitComboxSavePathFindAndReplace()
+        {
+            if (this.configData.SavePathFindList == null ||
+                this.configData.SavePathFindList.Count == 0)
+            {
+                this.configData.SavePathFindList =
+                    new List<string>(new string[] { "/mnt/t1", "D:" });
+            }
+            if (this.configData.SavePathReplaceList == null ||
+                this.configData.SavePathReplaceList.Count == 0)
+            {
+                this.configData.SavePathReplaceList =
+                    new List<string>(new string[] { "/mnt/t2", "E:" });
+            }
+
+            this.cbSavePathFind.SuspendLayout();
+            this.cbSavePathReplace.SuspendLayout();
+            this.cbSavePathFind.Items.Clear();
+            this.cbSavePathReplace.Items.Clear();
+
+            this.cbSavePathFind.Items.AddRange(this.configData.SavePathFindList.ToArray());
+            this.cbSavePathReplace.Items.AddRange(this.configData.SavePathReplaceList.ToArray());
+            this.cbSavePathFind.SelectedItem = this.configData.SavePathFindList[0];
+            this.cbSavePathReplace.SelectedItem = this.configData.SavePathReplaceList[0];
+
+            this.cbSavePathFind.ResumeLayout();
+            this.cbSavePathReplace.ResumeLayout();
+        }
+
+        private void UpdataComboxSavePathFindAndReplace(string savePathFind, string savePathReplace)
+        {
+            configData.SavePathFindList.Remove(savePathFind);
+            configData.SavePathFindList.Insert(0, savePathFind);
+            if (configData.SavePathFindList.Count > 30)
+                configData.SavePathFindList.RemoveRange(
+                    30, configData.SavePathFindList.Count - 30);
+
+            configData.SavePathReplaceList.Remove(savePathReplace);
+            configData.SavePathReplaceList.Insert(0, savePathReplace);
+            if (configData.SavePathReplaceList.Count > 30)
+                configData.SavePathReplaceList.RemoveRange(
+                    30, configData.SavePathReplaceList.Count - 30);
+
+            InitComboxSavePathFindAndReplace();
         }
 
         private Dictionary<string, string> GetVirtualToActualPathMap()
@@ -721,6 +796,8 @@ namespace MyQbt
             string replaceFrom = this.cbTrackerFind.Text.Trim();
             string replaceTo = this.cbTrackerReplace.Text.Trim();
 
+            UpdataComboxTrackFindAndReplace(replaceFrom, replaceTo);
+
             string[] files = Directory.GetFiles(
                 actionDirectory, "*.fastresume", SearchOption.AllDirectories);
             var parser = new BencodeNET.Parsing.BencodeParser();
@@ -747,10 +824,10 @@ namespace MyQbt
                     for (int i = 0; i < bl.Count; i++)
                     {
                         string str = bl[i].ToString();
-                        if (str.Contains(replaceFrom))
+                        if (str.IndexOf(replaceFrom, StringComparison.OrdinalIgnoreCase) != -1)
                         {
                             bl[i] = new BencodeNET.Objects.BString(
-                                str.Replace(replaceFrom, replaceTo));
+                                Helper.StringReplaceOnceAndIgnoreCase(str, replaceFrom, replaceTo));
                             changeFlag = true;
                         }
                     }
@@ -773,8 +850,10 @@ namespace MyQbt
 
             bool checkTorrentNeverStart = this.cbTorrentNeverStart.Checked;
             List<string> logList = new List<string>();
-            string diskFrom = this.cbDiskFrom.Text;
-            string diskTo = this.cbDiskTo.Text;
+            string diskFrom = this.cbSavePathFind.Text;
+            string diskTo = this.cbSavePathReplace.Text;
+
+            UpdataComboxSavePathFindAndReplace(diskFrom, diskTo);
 
             string[] files = Directory.GetFiles(
                 actionDirectory, "*.fastresume", SearchOption.AllDirectories);
@@ -793,6 +872,9 @@ namespace MyQbt
 
             foreach (string filePath in files)
             {
+                string torrentFilePath = filePath.Replace(".fastresume", ".torrent");
+                if (!File.Exists(torrentFilePath)) continue;
+
                 bool changeFlag = false;
                 var bdic = parser.Parse<BencodeNET.Objects.BDictionary>(filePath);
 
@@ -800,16 +882,18 @@ namespace MyQbt
 
                 string s1 = bdic[s1BString].ToString();
                 string s2 = bdic[s2BString].ToString();
-                if (s1[0].ToString().ToUpper() == diskFrom)
+                if (s1.IndexOf(diskFrom, StringComparison.OrdinalIgnoreCase) != -1)
                 {
                     bdic[s1BString] =
-                        new BencodeNET.Objects.BString(diskTo + s1.Substring(1));
+                        new BencodeNET.Objects.BString(
+                            Helper.StringReplaceOnceAndIgnoreCase(s1, diskFrom, diskTo));
                     changeFlag = true;
                 }
-                if (s2[0].ToString().ToUpper() == diskFrom)
+                if (s2.IndexOf(diskFrom, StringComparison.OrdinalIgnoreCase) != -1)
                 {
                     bdic[s2BString] =
-                        new BencodeNET.Objects.BString(diskTo + s2.Substring(1));
+                        new BencodeNET.Objects.BString(
+                            Helper.StringReplaceOnceAndIgnoreCase(s2, diskFrom, diskTo));
                     changeFlag = true;
                 }
 
@@ -817,8 +901,7 @@ namespace MyQbt
                 {
                     bdic.EncodeTo(filePath);
 
-                    var bencodeTorrent = parser.Parse<BencodeNET.Torrents.Torrent>(
-                        filePath.Replace(".fastresume", ".torrent"));
+                    var bencodeTorrent = parser.Parse<BencodeNET.Torrents.Torrent>(torrentFilePath);
 
                     string detectPath = bdic[s1BString].ToString();
                     bool hasRootFolder = (bdic[qhrfBString].ToString() == "1" ? true : false);
@@ -880,12 +963,18 @@ namespace MyQbt
 
             foreach (string filePath in files)
             {
-                var bdic = parser.Parse<BencodeNET.Objects.BDictionary>(filePath);
+                string torrentFilePath = filePath.Replace(".fastresume", ".torrent");
+                if (!File.Exists(torrentFilePath))
+                {
+                    File.Move(filePath,
+                        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Path.GetFileName(filePath)));
+                    continue;
+                }
 
+                var bdic = parser.Parse<BencodeNET.Objects.BDictionary>(filePath);
                 if (bdic[ctBString].ToString() == "0") continue;
 
-                var bencodeTorrent = parser.Parse<BencodeNET.Torrents.Torrent>(
-                    filePath.Replace(".fastresume", ".torrent"));
+                var bencodeTorrent = parser.Parse<BencodeNET.Torrents.Torrent>(torrentFilePath);
 
                 string detectPath = bdic[qspBString].ToString();
                 bool hasRootFolder = (bdic[qhrfBString].ToString() == "1" ? true : false);
@@ -920,10 +1009,11 @@ namespace MyQbt
 
                 foreach (KeyValuePair<string, string> kv in removeDic)
                 {
-                    File.Move(Path.Combine(actionDirectory, kv.Key + ".torrent"),
-                        Path.Combine(backUpDirectory, kv.Key + ".torrent"));
+
                     File.Move(Path.Combine(actionDirectory, kv.Key + ".fastresume"),
                         Path.Combine(backUpDirectory, kv.Key + ".fastresume"));
+                    File.Move(Path.Combine(actionDirectory, kv.Key + ".torrent"),
+                            Path.Combine(backUpDirectory, kv.Key + ".torrent"));
 
                     strLog += string.Format("{0} {1} {2}\n",
                         (i++).ToString().PadLeft(digitLen, '0'), kv.Key, kv.Value);
@@ -943,7 +1033,7 @@ namespace MyQbt
         private void RemoveAllCategoryTorrents()
         {
             string[] categorys = new string[] {
-                "DicMusic", "OpenCD", "Orpheus", "Redacted", "GGN" };
+                "DicMusic", "OpenCD", "Orpheus", "Redacted" };
 
             string actionDirectory = GetActionDirectory();
             if (actionDirectory == null) return;
@@ -954,6 +1044,8 @@ namespace MyQbt
             var parser = new BencodeNET.Parsing.BencodeParser();
             BencodeNET.Objects.BString categoryBString =
                 new BencodeNET.Objects.BString("qBt-category");
+            BencodeNET.Objects.BString qspBString =
+                new BencodeNET.Objects.BString("qBt-savePath");
             BencodeNET.Objects.BString ctBString =
                 new BencodeNET.Objects.BString("completed_time");
 
@@ -961,6 +1053,14 @@ namespace MyQbt
 
             foreach (string fastresumeFile in fastresumeFiles)
             {
+                string torrentFilePath = fastresumeFile.Replace(".fastresume", ".torrent");
+                if (!File.Exists(torrentFilePath))
+                {
+                    File.Move(fastresumeFile,
+                        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Path.GetFileName(fastresumeFile)));
+                    continue;
+                }
+
                 var bdic = parser.Parse<BencodeNET.Objects.BDictionary>(fastresumeFile);
                 if (bdic[ctBString].ToString() == "0") continue;
 
@@ -969,14 +1069,18 @@ namespace MyQbt
 
                 string categoryFolder = Path.Combine(
                     AppDomain.CurrentDomain.BaseDirectory, strTime, category);
+                if (category == "Redacted" &&
+                    bdic[qspBString].ToString().StartsWith("H:", StringComparison.OrdinalIgnoreCase))
+                {
+                    categoryFolder = Path.Combine(
+                        AppDomain.CurrentDomain.BaseDirectory, strTime, "Redacted_H");
+                }
                 Directory.CreateDirectory(categoryFolder);
-
-                string torrentFile = fastresumeFile.Replace(".fastresume", ".torrent");
 
                 File.Move(fastresumeFile, Path.Combine(
                     categoryFolder, Path.GetFileName(fastresumeFile)));
-                File.Move(torrentFile, Path.Combine(
-                    categoryFolder, Path.GetFileName(torrentFile)));
+                File.Move(torrentFilePath, Path.Combine(
+                    categoryFolder, Path.GetFileName(torrentFilePath)));
             }
 
             MessageBox.Show("移动完成");

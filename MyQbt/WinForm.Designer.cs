@@ -72,8 +72,8 @@
             this.cbTorrentNeverStart = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.btnDiskChange = new System.Windows.Forms.Button();
-            this.cbDiskTo = new System.Windows.Forms.ComboBox();
-            this.cbDiskFrom = new System.Windows.Forms.ComboBox();
+            this.cbSavePathReplace = new System.Windows.Forms.ComboBox();
+            this.cbSavePathFind = new System.Windows.Forms.ComboBox();
             this.tabPageµTorrentOffline = new System.Windows.Forms.TabPage();
             this.tabControl.SuspendLayout();
             this.tabPageqBittorrentOnline.SuspendLayout();
@@ -411,7 +411,7 @@
             this.cbKeepConnectSetting.Name = "cbKeepConnectSetting";
             this.cbKeepConnectSetting.Size = new System.Drawing.Size(96, 16);
             this.cbKeepConnectSetting.TabIndex = 6;
-            this.cbKeepConnectSetting.Text = "保存连接设置";
+            this.cbKeepConnectSetting.Text = "保存登录设置";
             this.cbKeepConnectSetting.UseVisualStyleBackColor = true;
             // 
             // tabPageqBittorrentOffline
@@ -431,9 +431,9 @@
             // 
             this.groupBoxOfflineOther.Controls.Add(this.btnRemoveNotExistDataFileTorrent);
             this.groupBoxOfflineOther.Controls.Add(this.buttonOther);
-            this.groupBoxOfflineOther.Location = new System.Drawing.Point(180, 159);
+            this.groupBoxOfflineOther.Location = new System.Drawing.Point(8, 263);
             this.groupBoxOfflineOther.Name = "groupBoxOfflineOther";
-            this.groupBoxOfflineOther.Size = new System.Drawing.Size(300, 107);
+            this.groupBoxOfflineOther.Size = new System.Drawing.Size(583, 106);
             this.groupBoxOfflineOther.TabIndex = 3;
             this.groupBoxOfflineOther.TabStop = false;
             this.groupBoxOfflineOther.Text = "其他";
@@ -442,7 +442,7 @@
             // 
             this.btnRemoveNotExistDataFileTorrent.Location = new System.Drawing.Point(6, 19);
             this.btnRemoveNotExistDataFileTorrent.Name = "btnRemoveNotExistDataFileTorrent";
-            this.btnRemoveNotExistDataFileTorrent.Size = new System.Drawing.Size(288, 23);
+            this.btnRemoveNotExistDataFileTorrent.Size = new System.Drawing.Size(571, 23);
             this.btnRemoveNotExistDataFileTorrent.TabIndex = 0;
             this.btnRemoveNotExistDataFileTorrent.Text = "移除实际数据不存在的种子";
             this.btnRemoveNotExistDataFileTorrent.UseVisualStyleBackColor = true;
@@ -450,9 +450,9 @@
             // 
             // buttonOther
             // 
-            this.buttonOther.Location = new System.Drawing.Point(6, 72);
+            this.buttonOther.Location = new System.Drawing.Point(6, 48);
             this.buttonOther.Name = "buttonOther";
-            this.buttonOther.Size = new System.Drawing.Size(288, 23);
+            this.buttonOther.Size = new System.Drawing.Size(571, 23);
             this.buttonOther.TabIndex = 0;
             this.buttonOther.Text = "其他";
             this.buttonOther.UseVisualStyleBackColor = true;
@@ -467,16 +467,16 @@
             this.groupBoxTrackers.Controls.Add(this.cbTrackerFind);
             this.groupBoxTrackers.Location = new System.Drawing.Point(8, 6);
             this.groupBoxTrackers.Name = "groupBoxTrackers";
-            this.groupBoxTrackers.Size = new System.Drawing.Size(472, 138);
+            this.groupBoxTrackers.Size = new System.Drawing.Size(583, 138);
             this.groupBoxTrackers.TabIndex = 2;
             this.groupBoxTrackers.TabStop = false;
-            this.groupBoxTrackers.Text = "Trackers 查找与替换";
+            this.groupBoxTrackers.Text = "Trackers 查找与替换（将Tracker中查找到的上行的字符串替换为下行的字符串）";
             // 
             // cbFindCategory
             // 
-            this.cbFindCategory.Location = new System.Drawing.Point(101, 74);
+            this.cbFindCategory.Location = new System.Drawing.Point(299, 74);
             this.cbFindCategory.Name = "cbFindCategory";
-            this.cbFindCategory.Size = new System.Drawing.Size(365, 20);
+            this.cbFindCategory.Size = new System.Drawing.Size(278, 20);
             this.cbFindCategory.TabIndex = 5;
             // 
             // label2
@@ -484,38 +484,34 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(6, 79);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(89, 12);
+            this.label2.Size = new System.Drawing.Size(287, 12);
             this.label2.TabIndex = 4;
-            this.label2.Text = "只修改特定分类";
+            this.label2.Text = "只替换分类为指定分类的Tracker（空表示全部分类）";
             // 
             // btnTrackerFindAndReplace
             // 
             this.btnTrackerFindAndReplace.Location = new System.Drawing.Point(6, 102);
             this.btnTrackerFindAndReplace.Name = "btnTrackerFindAndReplace";
-            this.btnTrackerFindAndReplace.Size = new System.Drawing.Size(460, 23);
+            this.btnTrackerFindAndReplace.Size = new System.Drawing.Size(571, 23);
             this.btnTrackerFindAndReplace.TabIndex = 2;
-            this.btnTrackerFindAndReplace.Text = "Trackers 查找与替换";
+            this.btnTrackerFindAndReplace.Text = "Trackers 查找与替换（只替换第一次查找到的，查找不区分大小写）";
             this.btnTrackerFindAndReplace.UseVisualStyleBackColor = true;
             this.btnTrackerFindAndReplace.Click += new System.EventHandler(this.BtnTrackerFindAndReplace_Click);
             // 
             // cbTrackerReplace
             // 
             this.cbTrackerReplace.FormattingEnabled = true;
-            this.cbTrackerReplace.Items.AddRange(new object[] {
-            "https://"});
             this.cbTrackerReplace.Location = new System.Drawing.Point(6, 47);
             this.cbTrackerReplace.Name = "cbTrackerReplace";
-            this.cbTrackerReplace.Size = new System.Drawing.Size(460, 20);
+            this.cbTrackerReplace.Size = new System.Drawing.Size(571, 20);
             this.cbTrackerReplace.TabIndex = 1;
             // 
             // cbTrackerFind
             // 
             this.cbTrackerFind.FormattingEnabled = true;
-            this.cbTrackerFind.Items.AddRange(new object[] {
-            "http://"});
             this.cbTrackerFind.Location = new System.Drawing.Point(6, 20);
             this.cbTrackerFind.Name = "cbTrackerFind";
-            this.cbTrackerFind.Size = new System.Drawing.Size(460, 20);
+            this.cbTrackerFind.Size = new System.Drawing.Size(571, 20);
             this.cbTrackerFind.TabIndex = 0;
             // 
             // groupBoxModifyDisk
@@ -523,21 +519,21 @@
             this.groupBoxModifyDisk.Controls.Add(this.cbTorrentNeverStart);
             this.groupBoxModifyDisk.Controls.Add(this.label1);
             this.groupBoxModifyDisk.Controls.Add(this.btnDiskChange);
-            this.groupBoxModifyDisk.Controls.Add(this.cbDiskTo);
-            this.groupBoxModifyDisk.Controls.Add(this.cbDiskFrom);
-            this.groupBoxModifyDisk.Location = new System.Drawing.Point(8, 159);
+            this.groupBoxModifyDisk.Controls.Add(this.cbSavePathReplace);
+            this.groupBoxModifyDisk.Controls.Add(this.cbSavePathFind);
+            this.groupBoxModifyDisk.Location = new System.Drawing.Point(8, 150);
             this.groupBoxModifyDisk.Name = "groupBoxModifyDisk";
-            this.groupBoxModifyDisk.Size = new System.Drawing.Size(166, 107);
+            this.groupBoxModifyDisk.Size = new System.Drawing.Size(583, 107);
             this.groupBoxModifyDisk.TabIndex = 1;
             this.groupBoxModifyDisk.TabStop = false;
-            this.groupBoxModifyDisk.Text = "修改磁盘名";
+            this.groupBoxModifyDisk.Text = "保存路径字符串查找与替换（将保存路径中查找到的前面的字符串替换为后面的字符串）";
             // 
             // cbTorrentNeverStart
             // 
             this.cbTorrentNeverStart.AutoSize = true;
             this.cbTorrentNeverStart.Checked = true;
             this.cbTorrentNeverStart.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbTorrentNeverStart.Location = new System.Drawing.Point(6, 48);
+            this.cbTorrentNeverStart.Location = new System.Drawing.Point(6, 49);
             this.cbTorrentNeverStart.Name = "cbTorrentNeverStart";
             this.cbTorrentNeverStart.Size = new System.Drawing.Size(144, 16);
             this.cbTorrentNeverStart.TabIndex = 4;
@@ -547,7 +543,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(74, 24);
+            this.label1.Location = new System.Drawing.Point(283, 24);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(17, 12);
             this.label1.TabIndex = 3;
@@ -557,29 +553,27 @@
             // 
             this.btnDiskChange.Location = new System.Drawing.Point(6, 72);
             this.btnDiskChange.Name = "btnDiskChange";
-            this.btnDiskChange.Size = new System.Drawing.Size(152, 23);
+            this.btnDiskChange.Size = new System.Drawing.Size(571, 23);
             this.btnDiskChange.TabIndex = 2;
-            this.btnDiskChange.Text = "修改磁盘名";
+            this.btnDiskChange.Text = "保存路径字符串查找与替换（只替换第一次查找到的，查找不区分大小写）";
             this.btnDiskChange.UseVisualStyleBackColor = true;
             this.btnDiskChange.Click += new System.EventHandler(this.BtnDiskChange_Click);
             // 
-            // cbDiskTo
+            // cbSavePathReplace
             // 
-            this.cbDiskTo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbDiskTo.FormattingEnabled = true;
-            this.cbDiskTo.Location = new System.Drawing.Point(98, 20);
-            this.cbDiskTo.Name = "cbDiskTo";
-            this.cbDiskTo.Size = new System.Drawing.Size(60, 20);
-            this.cbDiskTo.TabIndex = 1;
+            this.cbSavePathReplace.FormattingEnabled = true;
+            this.cbSavePathReplace.Location = new System.Drawing.Point(311, 20);
+            this.cbSavePathReplace.Name = "cbSavePathReplace";
+            this.cbSavePathReplace.Size = new System.Drawing.Size(266, 20);
+            this.cbSavePathReplace.TabIndex = 1;
             // 
-            // cbDiskFrom
+            // cbSavePathFind
             // 
-            this.cbDiskFrom.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbDiskFrom.FormattingEnabled = true;
-            this.cbDiskFrom.Location = new System.Drawing.Point(6, 20);
-            this.cbDiskFrom.Name = "cbDiskFrom";
-            this.cbDiskFrom.Size = new System.Drawing.Size(60, 20);
-            this.cbDiskFrom.TabIndex = 0;
+            this.cbSavePathFind.FormattingEnabled = true;
+            this.cbSavePathFind.Location = new System.Drawing.Point(6, 20);
+            this.cbSavePathFind.Name = "cbSavePathFind";
+            this.cbSavePathFind.Size = new System.Drawing.Size(266, 20);
+            this.cbSavePathFind.TabIndex = 0;
             // 
             // tabPageµTorrentOffline
             // 
@@ -650,8 +644,8 @@
         private System.Windows.Forms.GroupBox groupBoxModifyDisk;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnDiskChange;
-        private System.Windows.Forms.ComboBox cbDiskTo;
-        private System.Windows.Forms.ComboBox cbDiskFrom;
+        private System.Windows.Forms.ComboBox cbSavePathReplace;
+        private System.Windows.Forms.ComboBox cbSavePathFind;
         private System.Windows.Forms.Button btnRemoveNotExistDataFileTorrent;
         private System.Windows.Forms.GroupBox groupBoxOfflineOther;
         private System.Windows.Forms.GroupBox groupBoxTrackers;

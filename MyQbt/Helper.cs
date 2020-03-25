@@ -259,5 +259,13 @@ namespace MyQbt
             }
             return true;
         }
+
+        public static string StringReplaceOnceAndIgnoreCase(
+            string str, string replaceFrom, string replaceTo)
+        {
+            int i = str.IndexOf(replaceFrom, StringComparison.OrdinalIgnoreCase);
+            if (i == -1) return str;
+            else return str.Substring(0, i) + replaceTo + str.Substring(i + replaceFrom.Length);
+        }
     }
 }
