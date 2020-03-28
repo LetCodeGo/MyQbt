@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
+using Transmission.API.RPC.Entity;
 
 namespace MyQbt
 {
@@ -18,6 +20,9 @@ namespace MyQbt
 
         private static readonly string configPath = Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory, "MyQbtConfig.xml");
+
+        private Config.BTClient btClient = Config.BTClient.qBittorrent;
+        private Transmission.API.RPC.Client transmissionClient = null;
 
         private Config configData;
 
@@ -36,7 +41,7 @@ namespace MyQbt
         private void WinForm_Load(object sender, EventArgs e)
         {
             this.Icon = Properties.Resources.icon;
-            this.Text = String.Format("MyQbt [v{0}]", Application.ProductVersion);
+            this.Text = String.Format("MyQbt v{0}", Application.ProductVersion);
             this.groupBoxAdd.Enabled = false;
             this.groupBoxOnlineOther.Enabled = false;
 
@@ -47,6 +52,9 @@ namespace MyQbt
             this.cbPathMap.Checked = configData.IsPathMap;
             this.cbPathMap.CheckedChanged +=
                 CbSaveDiskOrFolder_SelectedIndexChanged;
+
+            this.rbqBittorrent.Checked = (configData.BTClientType == Config.BTClient.qBittorrent);
+            this.rbTransmission.Checked = (!this.rbqBittorrent.Checked);
 
             this.rbWindows.Checked = (configData.QbtSystemType == Config.SystemType.Windows);
             this.rbLinux.Checked = (!this.rbWindows.Checked);
@@ -159,6 +167,7 @@ namespace MyQbt
                 configData = new Config()
                 {
                     IsPathMap = false,
+                    BTClientType = Config.BTClient.qBittorrent,
                     QbtSystemType = Config.SystemType.Windows
                 };
             }
@@ -166,6 +175,8 @@ namespace MyQbt
 
         private void SaveConfig()
         {
+            if (this.rbqBittorrent.Checked) configData.BTClientType = Config.BTClient.qBittorrent;
+            else configData.BTClientType = Config.BTClient.Transmission;
             if (this.rbWindows.Checked) configData.QbtSystemType = Config.SystemType.Windows;
             else configData.QbtSystemType = Config.SystemType.Linux;
             configData.IsPathMap = this.cbPathMap.Checked;
@@ -256,8 +267,9 @@ namespace MyQbt
         {
             this.cbCategory.SuspendLayout();
             this.cbCategory.Items.Clear();
-            this.cbCategory.Items.AddRange(
-                (await QbtWebAPI.API.GetAllCategoryString()).ToArray());
+            if (btClient == Config.BTClient.qBittorrent)
+                this.cbCategory.Items.AddRange(
+                    (await QbtWebAPI.API.GetAllCategoryString()).ToArray());
             this.cbCategory.Text = "";
             this.cbCategory.ResumeLayout();
         }
@@ -457,28 +469,77 @@ namespace MyQbt
             this.cbSettingSaveFolder.Text = strTemp;
         }
 
+        private void rbqBittorrent_CheckedChanged(object sender, EventArgs e)
+        {
+            btClient = (this.rbqBittorrent.Checked ?
+                Config.BTClient.qBittorrent : Config.BTClient.Transmission);
+
+            this.Text = String.Format("MyQbt v{0}", Application.ProductVersion);
+            this.groupBoxAdd.Enabled = false;
+            this.groupBoxOnlineOther.Enabled = false;
+        }
+
         private async void BtnLogin_Click(object sender, EventArgs e)
         {
-            QbtWebAPI.API.Initialize(this.cbUrl.Text);
             bool? flag = null;
+            bool isVersionValid = false;
             string errMsg = "";
+            string btClientVersion = "";
             try
             {
-                flag = await QbtWebAPI.API.Login(
-                    this.tbUser.Text, this.tbPassword.Text);
+                if (btClient == Config.BTClient.qBittorrent)
+                {
+                    QbtWebAPI.API.Initialize(this.cbUrl.Text);
+                    flag = await QbtWebAPI.API.Login(
+                        this.tbUser.Text, this.tbPassword.Text);
+                    btClientVersion = await QbtWebAPI.API.GetQbittorrentVersion();
+                    isVersionValid = (string.Compare(btClientVersion, "v4.1", true) >= 0);
+                    if (!isVersionValid)
+                        errMsg = string.Format(
+                            "qBittorrent 当前版本为 {0}，需 >=v4.1", btClientVersion);
+                }
+                else if (btClient == Config.BTClient.Transmission)
+                {
+                    transmissionClient = new Transmission.API.RPC.Client(
+                        string.Format("{0}/transmission/rpc",
+                        this.cbUrl.Text.Replace('\\', '/').TrimEnd(new char[] { '/' })),
+                        null, this.tbUser.Text, this.tbPassword.Text);
+                    var info = transmissionClient.GetSessionInformation();
+                    Debug.Assert(info != null && info.Version != null);
+                    btClientVersion = "v" + info.Version;
+                    flag = true;
+                    isVersionValid = (string.Compare(btClientVersion, "v2.8", true) >= 0);
+                    if (!isVersionValid)
+                        errMsg = string.Format(
+                            "Transmission 当前版本为 {0}，需 >=v2.8", btClientVersion);
+                }
             }
             catch (Exception ex)
             {
+                flag = null;
                 errMsg = string.Format("{0}{1}", ex.Message,
                     (ex.InnerException != null) ? ex.InnerException.Message : "");
             }
 
-            if (flag ?? false)
+            if ((flag ?? false) && isVersionValid)
             {
+                Uri uri = new Uri(this.cbUrl.Text);
+                this.Text = string.Format("[{0} {1}]@{2}:{3} [MyQbt v{4}]",
+                    btClient == Config.BTClient.qBittorrent ? "qBittorrent" : "Transmission",
+                    btClientVersion, uri.Host, uri.Port, Application.ProductVersion);
                 this.groupBoxAdd.Enabled = true;
                 this.groupBoxOnlineOther.Enabled = true;
+                if (btClient == Config.BTClient.qBittorrent)
+                {
+                    this.cbSkipHashCheck.Enabled = true;
+                }
+                else
+                {
+                    this.cbSkipHashCheck.Checked = false;
+                    this.cbSkipHashCheck.Enabled = false;
+                }
 
-                InitComboxCategory();
+                if (btClient == Config.BTClient.qBittorrent) InitComboxCategory();
 
                 if (configData.ConnectList == null)
                     configData.ConnectList = new List<Config.Connect>();
@@ -510,7 +571,7 @@ namespace MyQbt
             {
                 this.groupBoxAdd.Enabled = false;
                 this.groupBoxOnlineOther.Enabled = false;
-                MessageBox.Show(errMsg);
+                MessageBox.Show(errMsg, "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -584,8 +645,7 @@ namespace MyQbt
                                 torrentPath, bencodeTorrent, settingSaveFolder,
                                 this.cbSkipHashCheck.Checked,
                                 this.cbStartTorrent.Checked, category,
-                                isWindowsPath,
-                                actualToVirtualDic);
+                                btClient, isWindowsPath, actualToVirtualDic, transmissionClient);
 
                             successList.Add(torrentPath);
                             UpdataComboxSettingSaveFolder(settingSaveFolder);
@@ -601,7 +661,7 @@ namespace MyQbt
                             torrentPath, bencodeTorrent, settingSaveFolder,
                             this.cbSkipHashCheck.Checked,
                             this.cbStartTorrent.Checked, category,
-                            isWindowsPath, actualToVirtualDic)
+                            btClient, isWindowsPath, actualToVirtualDic, transmissionClient)
                         {
                             UpdataResultAndReason = this.UpdataManualAddResultAddReason
                         };
@@ -629,11 +689,25 @@ namespace MyQbt
 
                         try
                         {
-                            await QbtWebAPI.API.DownloadFromDisk(
-                                new List<string>() { torrentPath }, settingSaveFolder,
-                                null, string.IsNullOrWhiteSpace(category) ? null : category,
-                                this.cbSkipHashCheck.Checked, !this.cbStartTorrent.Checked,
-                                null, bencodeTorrent.DisplayName, null, null, null, null);
+                            if (btClient == Config.BTClient.qBittorrent)
+                            {
+                                await QbtWebAPI.API.DownloadFromDisk(
+                                    new List<string>() { torrentPath }, settingSaveFolder,
+                                    null, string.IsNullOrWhiteSpace(category) ? null : category,
+                                    this.cbSkipHashCheck.Checked, !this.cbStartTorrent.Checked,
+                                    null, bencodeTorrent.DisplayName, null, null, null, null);
+                            }
+                            else if (btClient == Config.BTClient.Transmission)
+                            {
+                                var addedTorrent = new NewTorrent
+                                {
+                                    Metainfo = Helper.GetTransmissionTorrentAddMetainfo(torrentPath),
+                                    DownloadDirectory = settingSaveFolder,
+                                    Paused = (!this.cbStartTorrent.Checked)
+                                };
+                                var addedTorrentInfo = transmissionClient.TorrentAdd(addedTorrent);
+                                Debug.Assert(addedTorrentInfo != null && addedTorrentInfo.ID != 0);
+                            }
 
                             successList.Add(torrentPath);
                             UpdataComboxSettingSaveFolder(settingSaveFolder);

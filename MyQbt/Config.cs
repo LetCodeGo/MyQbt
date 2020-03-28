@@ -38,6 +38,15 @@ namespace MyQbt
             Linux
         }
 
+        public enum BTClient
+        {
+            [XmlEnum("qBittorrent")]
+            qBittorrent,
+            [XmlEnum("Transmission")]
+            Transmission
+        }
+        [XmlAttribute("BTClientType")]
+        public BTClient BTClientType;
         [XmlAttribute("QbtSystemType")]
         public SystemType QbtSystemType;
         [XmlAttribute("IsPathMap")]

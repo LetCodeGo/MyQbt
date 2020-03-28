@@ -267,5 +267,27 @@ namespace MyQbt
             if (i == -1) return str;
             else return str.Substring(0, i) + replaceTo + str.Substring(i + replaceFrom.Length);
         }
+
+        public static string GetTransmissionTorrentAddMetainfo(string torrentPath)
+        {
+            var fstream = File.OpenRead(torrentPath);
+            byte[] filebytes = new byte[fstream.Length];
+            fstream.Read(filebytes, 0, Convert.ToInt32(fstream.Length));
+
+            return Convert.ToBase64String(filebytes);
+        }
+
+        public static string GetDirectoryNameDonntChangeDelimiter(string path)
+        {
+            if (path == null) return null;
+            path = path.TrimEnd(new char[] { '/', '\\', ' ' });
+            if (path == "" || path.EndsWith(":")) return null;
+
+            int index1 = path.LastIndexOf('/');
+            int index2 = path.LastIndexOf('\\');
+            int index = Math.Max(index1, index2);
+            if (index == -1) return "";
+            else return path.Substring(0, index);
+        }
     }
 }

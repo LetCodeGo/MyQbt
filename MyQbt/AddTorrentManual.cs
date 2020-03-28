@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
@@ -10,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Transmission.API.RPC.Entity;
 
 namespace MyQbt
 {
@@ -45,6 +47,9 @@ namespace MyQbt
             TextFormatFlags.EndEllipsis;
         private Rectangle rect;
         private SolidBrush brush = new SolidBrush(Color.FromArgb(0, 120, 215));
+
+        private Config.BTClient btClient = Config.BTClient.qBittorrent;
+        private Transmission.API.RPC.Client transmissionClient = null;
 
         public class DataNode
         {
@@ -171,8 +176,10 @@ namespace MyQbt
             bool skipHashCheck,
             bool startTorrent,
             string category,
+            Config.BTClient btClient,
             bool isWindowsPath,
-            Dictionary<string, string> actualToVirtualDic = null)
+            Dictionary<string, string> actualToVirtualDic = null,
+            Transmission.API.RPC.Client transmissionClient = null)
         {
             InitializeComponent();
 
@@ -182,11 +189,21 @@ namespace MyQbt
             this.torrentPath = torrentPath;
             this.bencodeTorrent = bencodeTorrent;
             this.settingSaveFolder = settingSaveFolder;
-            this.cbSkipHashCheck.Checked = skipHashCheck;
+            if (btClient == Config.BTClient.qBittorrent)
+            {
+                this.cbSkipHashCheck.Checked = skipHashCheck;
+            }
+            else if (btClient == Config.BTClient.Transmission)
+            {
+                this.cbSkipHashCheck.Checked = false;
+                this.cbSkipHashCheck.Enabled = false;
+            }
             this.cbStartTorrent.Checked = startTorrent;
             this.defaultCategory = category;
+            this.btClient = btClient;
             this.isWindowsPath = isWindowsPath;
             this.actualToVirtualDic = actualToVirtualDic;
+            this.transmissionClient = transmissionClient;
         }
 
         private async void AddTorrentManual_Load(object sender, EventArgs e)
@@ -195,8 +212,9 @@ namespace MyQbt
 
             this.cbCategory.SuspendLayout();
             this.cbCategory.Items.Clear();
-            this.cbCategory.Items.AddRange(
-                (await QbtWebAPI.API.GetAllCategoryString()).ToArray());
+            if (btClient == Config.BTClient.qBittorrent)
+                this.cbCategory.Items.AddRange(
+                    (await QbtWebAPI.API.GetAllCategoryString()).ToArray());
             this.cbCategory.Text = this.defaultCategory;
             this.cbCategory.ResumeLayout();
 
@@ -258,13 +276,47 @@ namespace MyQbt
                     }
                 }
 
-                await QbtWebAPI.API.DownloadFromDisk(
-                    new List<string>() { torrentPath },
-                    s1, null,
-                    string.IsNullOrWhiteSpace(this.cbCategory.Text) ?
-                    null : this.cbCategory.Text,
-                    this.cbSkipHashCheck.Checked, !this.cbStartTorrent.Checked,
-                    false, s2, null, null, null, null);
+                if (this.btClient == Config.BTClient.qBittorrent)
+                {
+                    await QbtWebAPI.API.DownloadFromDisk(
+                        new List<string>() { torrentPath },
+                        s1, null,
+                        string.IsNullOrWhiteSpace(this.cbCategory.Text) ?
+                        null : this.cbCategory.Text,
+                        this.cbSkipHashCheck.Checked, !this.cbStartTorrent.Checked,
+                        false, s2, null, null, null, null);
+                }
+                else if (this.btClient == Config.BTClient.Transmission)
+                {
+                    Debug.Assert(transmissionClient != null);
+                    var addedTorrent = new NewTorrent
+                    {
+                        Metainfo = Helper.GetTransmissionTorrentAddMetainfo(torrentPath),
+                        DownloadDirectory = (
+                            bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single ?
+                            s1 :
+                            Helper.GetDirectoryNameDonntChangeDelimiter(s1)),
+                        Paused = (
+                            bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single ?
+                            (!this.cbStartTorrent.Checked) : true)
+                    };
+                    var addedTorrentInfo = transmissionClient.TorrentAdd(addedTorrent);
+                    Debug.Assert(addedTorrentInfo != null && addedTorrentInfo.ID != 0);
+
+                    if (bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Multi)
+                    {
+                        var result = transmissionClient.TorrentRenamePath(
+                            addedTorrentInfo.ID,
+                            bencodeTorrent.DisplayName,
+                            Path.GetFileName(s1));
+                        Debug.Assert(result != null && result.ID != 0);
+
+                        if (this.cbStartTorrent.Checked)
+                        {
+                            transmissionClient.TorrentStartNow(new int[] { result.ID });
+                        }
+                    }
+                }
 
                 this.isAddTorrentSuccess = true;
                 this.failedReason = "";

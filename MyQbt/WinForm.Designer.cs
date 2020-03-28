@@ -57,6 +57,8 @@
             this.rbManual = new System.Windows.Forms.RadioButton();
             this.rbAddPrefixWithFileName = new System.Windows.Forms.RadioButton();
             this.groupBoxLogin = new System.Windows.Forms.GroupBox();
+            this.rbTransmission = new System.Windows.Forms.RadioButton();
+            this.rbqBittorrent = new System.Windows.Forms.RadioButton();
             this.cbKeepConnectSetting = new System.Windows.Forms.CheckBox();
             this.tabPageqBittorrentOffline = new System.Windows.Forms.TabPage();
             this.groupBoxOfflineOther = new System.Windows.Forms.GroupBox();
@@ -94,9 +96,9 @@
             // 
             this.cbUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.cbUrl.Location = new System.Drawing.Point(8, 20);
+            this.cbUrl.Location = new System.Drawing.Point(8, 42);
             this.cbUrl.Name = "cbUrl";
-            this.cbUrl.Size = new System.Drawing.Size(253, 20);
+            this.cbUrl.Size = new System.Drawing.Size(278, 20);
             this.cbUrl.TabIndex = 0;
             this.cbUrl.Text = "http://127.0.0.1:12305/";
             this.cbUrl.SelectedIndexChanged += new System.EventHandler(this.CbUrl_SelectedIndexChanged);
@@ -105,9 +107,9 @@
             // 
             this.tbUser.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbUser.Location = new System.Drawing.Point(8, 43);
+            this.tbUser.Location = new System.Drawing.Point(8, 65);
             this.tbUser.Name = "tbUser";
-            this.tbUser.Size = new System.Drawing.Size(253, 21);
+            this.tbUser.Size = new System.Drawing.Size(278, 21);
             this.tbUser.TabIndex = 1;
             this.tbUser.Text = "admin";
             // 
@@ -115,19 +117,19 @@
             // 
             this.tbPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbPassword.Location = new System.Drawing.Point(8, 66);
+            this.tbPassword.Location = new System.Drawing.Point(8, 88);
             this.tbPassword.Name = "tbPassword";
             this.tbPassword.PasswordChar = '*';
-            this.tbPassword.Size = new System.Drawing.Size(253, 21);
+            this.tbPassword.Size = new System.Drawing.Size(278, 21);
             this.tbPassword.TabIndex = 2;
             this.tbPassword.Text = "password";
             // 
             // btnLogin
             // 
             this.btnLogin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLogin.Location = new System.Drawing.Point(110, 91);
+            this.btnLogin.Location = new System.Drawing.Point(110, 112);
             this.btnLogin.Name = "btnLogin";
-            this.btnLogin.Size = new System.Drawing.Size(151, 23);
+            this.btnLogin.Size = new System.Drawing.Size(176, 23);
             this.btnLogin.TabIndex = 3;
             this.btnLogin.Text = "登陆";
             this.btnLogin.UseVisualStyleBackColor = true;
@@ -162,9 +164,9 @@
             // groupBoxOnlineOther
             // 
             this.groupBoxOnlineOther.Controls.Add(this.btnGetCategoryAllTorrentSavePath);
-            this.groupBoxOnlineOther.Location = new System.Drawing.Point(284, 318);
+            this.groupBoxOnlineOther.Location = new System.Drawing.Point(309, 318);
             this.groupBoxOnlineOther.Name = "groupBoxOnlineOther";
-            this.groupBoxOnlineOther.Size = new System.Drawing.Size(500, 98);
+            this.groupBoxOnlineOther.Size = new System.Drawing.Size(475, 98);
             this.groupBoxOnlineOther.TabIndex = 7;
             this.groupBoxOnlineOther.TabStop = false;
             this.groupBoxOnlineOther.Text = "其他";
@@ -173,7 +175,7 @@
             // 
             this.btnGetCategoryAllTorrentSavePath.Location = new System.Drawing.Point(12, 20);
             this.btnGetCategoryAllTorrentSavePath.Name = "btnGetCategoryAllTorrentSavePath";
-            this.btnGetCategoryAllTorrentSavePath.Size = new System.Drawing.Size(476, 23);
+            this.btnGetCategoryAllTorrentSavePath.Size = new System.Drawing.Size(451, 23);
             this.btnGetCategoryAllTorrentSavePath.TabIndex = 5;
             this.btnGetCategoryAllTorrentSavePath.Text = "获取分类下所有种子保存路径";
             this.btnGetCategoryAllTorrentSavePath.UseVisualStyleBackColor = true;
@@ -182,9 +184,9 @@
             // groupBoxPathMap
             // 
             this.groupBoxPathMap.Controls.Add(this.rtbPathMap);
-            this.groupBoxPathMap.Location = new System.Drawing.Point(8, 130);
+            this.groupBoxPathMap.Location = new System.Drawing.Point(8, 153);
             this.groupBoxPathMap.Name = "groupBoxPathMap";
-            this.groupBoxPathMap.Size = new System.Drawing.Size(270, 286);
+            this.groupBoxPathMap.Size = new System.Drawing.Size(295, 263);
             this.groupBoxPathMap.TabIndex = 6;
             this.groupBoxPathMap.TabStop = false;
             this.groupBoxPathMap.Text = "路径映射（前为本机路径，后为远程路径）";
@@ -195,7 +197,7 @@
             this.rtbPathMap.Dock = System.Windows.Forms.DockStyle.Fill;
             this.rtbPathMap.Location = new System.Drawing.Point(3, 17);
             this.rtbPathMap.Name = "rtbPathMap";
-            this.rtbPathMap.Size = new System.Drawing.Size(264, 266);
+            this.rtbPathMap.Size = new System.Drawing.Size(289, 243);
             this.rtbPathMap.TabIndex = 0;
             this.rtbPathMap.Text = "";
             // 
@@ -209,9 +211,9 @@
             this.groupBoxAdd.Controls.Add(this.btnAddTorrent);
             this.groupBoxAdd.Controls.Add(this.groupBoxAddSaveFolder);
             this.groupBoxAdd.Controls.Add(this.groupBoxAddType);
-            this.groupBoxAdd.Location = new System.Drawing.Point(284, 6);
+            this.groupBoxAdd.Location = new System.Drawing.Point(309, 6);
             this.groupBoxAdd.Name = "groupBoxAdd";
-            this.groupBoxAdd.Size = new System.Drawing.Size(500, 306);
+            this.groupBoxAdd.Size = new System.Drawing.Size(475, 306);
             this.groupBoxAdd.TabIndex = 5;
             this.groupBoxAdd.TabStop = false;
             this.groupBoxAdd.Text = "添加种子";
@@ -222,7 +224,7 @@
             this.groupBoxQbtSysytem.Controls.Add(this.rbWindows);
             this.groupBoxQbtSysytem.Location = new System.Drawing.Point(6, 16);
             this.groupBoxQbtSysytem.Name = "groupBoxQbtSysytem";
-            this.groupBoxQbtSysytem.Size = new System.Drawing.Size(488, 48);
+            this.groupBoxQbtSysytem.Size = new System.Drawing.Size(463, 48);
             this.groupBoxQbtSysytem.TabIndex = 9;
             this.groupBoxQbtSysytem.TabStop = false;
             this.groupBoxQbtSysytem.Text = "qBittorrent 所在系统（此项影响对路径的检测判断）";
@@ -264,7 +266,7 @@
             this.cbCategory.FormattingEnabled = true;
             this.cbCategory.Location = new System.Drawing.Point(72, 246);
             this.cbCategory.Name = "cbCategory";
-            this.cbCategory.Size = new System.Drawing.Size(416, 20);
+            this.cbCategory.Size = new System.Drawing.Size(391, 20);
             this.cbCategory.TabIndex = 7;
             // 
             // label3
@@ -279,7 +281,7 @@
             // cbStartTorrent
             // 
             this.cbStartTorrent.AutoSize = true;
-            this.cbStartTorrent.Location = new System.Drawing.Point(386, 224);
+            this.cbStartTorrent.Location = new System.Drawing.Point(361, 224);
             this.cbStartTorrent.Name = "cbStartTorrent";
             this.cbStartTorrent.Size = new System.Drawing.Size(102, 16);
             this.cbStartTorrent.TabIndex = 5;
@@ -290,7 +292,7 @@
             // 
             this.btnAddTorrent.Location = new System.Drawing.Point(12, 272);
             this.btnAddTorrent.Name = "btnAddTorrent";
-            this.btnAddTorrent.Size = new System.Drawing.Size(476, 23);
+            this.btnAddTorrent.Size = new System.Drawing.Size(451, 23);
             this.btnAddTorrent.TabIndex = 4;
             this.btnAddTorrent.Text = "添加种子";
             this.btnAddTorrent.UseVisualStyleBackColor = true;
@@ -304,7 +306,7 @@
             this.groupBoxAddSaveFolder.Controls.Add(this.cbSaveDisk);
             this.groupBoxAddSaveFolder.Location = new System.Drawing.Point(6, 121);
             this.groupBoxAddSaveFolder.Name = "groupBoxAddSaveFolder";
-            this.groupBoxAddSaveFolder.Size = new System.Drawing.Size(488, 97);
+            this.groupBoxAddSaveFolder.Size = new System.Drawing.Size(463, 97);
             this.groupBoxAddSaveFolder.TabIndex = 1;
             this.groupBoxAddSaveFolder.TabStop = false;
             this.groupBoxAddSaveFolder.Text = "保存文件夹";
@@ -323,16 +325,16 @@
             // 
             this.cbSettingSaveFolder.Location = new System.Drawing.Point(6, 68);
             this.cbSettingSaveFolder.Name = "cbSettingSaveFolder";
-            this.cbSettingSaveFolder.Size = new System.Drawing.Size(476, 20);
+            this.cbSettingSaveFolder.Size = new System.Drawing.Size(451, 20);
             this.cbSettingSaveFolder.TabIndex = 2;
             // 
             // cbSaveFolder
             // 
             this.cbSaveFolder.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbSaveFolder.FormattingEnabled = true;
-            this.cbSaveFolder.Location = new System.Drawing.Point(252, 20);
+            this.cbSaveFolder.Location = new System.Drawing.Point(238, 20);
             this.cbSaveFolder.Name = "cbSaveFolder";
-            this.cbSaveFolder.Size = new System.Drawing.Size(230, 20);
+            this.cbSaveFolder.Size = new System.Drawing.Size(219, 20);
             this.cbSaveFolder.TabIndex = 1;
             // 
             // cbSaveDisk
@@ -341,7 +343,7 @@
             this.cbSaveDisk.FormattingEnabled = true;
             this.cbSaveDisk.Location = new System.Drawing.Point(6, 20);
             this.cbSaveDisk.Name = "cbSaveDisk";
-            this.cbSaveDisk.Size = new System.Drawing.Size(230, 20);
+            this.cbSaveDisk.Size = new System.Drawing.Size(219, 20);
             this.cbSaveDisk.TabIndex = 0;
             // 
             // groupBoxAddType
@@ -351,7 +353,7 @@
             this.groupBoxAddType.Controls.Add(this.rbAddPrefixWithFileName);
             this.groupBoxAddType.Location = new System.Drawing.Point(6, 67);
             this.groupBoxAddType.Name = "groupBoxAddType";
-            this.groupBoxAddType.Size = new System.Drawing.Size(488, 48);
+            this.groupBoxAddType.Size = new System.Drawing.Size(463, 48);
             this.groupBoxAddType.TabIndex = 0;
             this.groupBoxAddType.TabStop = false;
             this.groupBoxAddType.Text = "方式";
@@ -390,6 +392,8 @@
             // 
             // groupBoxLogin
             // 
+            this.groupBoxLogin.Controls.Add(this.rbTransmission);
+            this.groupBoxLogin.Controls.Add(this.rbqBittorrent);
             this.groupBoxLogin.Controls.Add(this.cbKeepConnectSetting);
             this.groupBoxLogin.Controls.Add(this.cbUrl);
             this.groupBoxLogin.Controls.Add(this.btnLogin);
@@ -397,17 +401,40 @@
             this.groupBoxLogin.Controls.Add(this.tbPassword);
             this.groupBoxLogin.Location = new System.Drawing.Point(8, 6);
             this.groupBoxLogin.Name = "groupBoxLogin";
-            this.groupBoxLogin.Size = new System.Drawing.Size(270, 118);
+            this.groupBoxLogin.Size = new System.Drawing.Size(295, 141);
             this.groupBoxLogin.TabIndex = 4;
             this.groupBoxLogin.TabStop = false;
-            this.groupBoxLogin.Text = "登陆（qBittorrent v4.1+）";
+            this.groupBoxLogin.Text = "登陆（qBittorrent v4.1+|Transmission v2.8+）";
+            // 
+            // rbTransmission
+            // 
+            this.rbTransmission.AutoSize = true;
+            this.rbTransmission.Location = new System.Drawing.Point(103, 20);
+            this.rbTransmission.Name = "rbTransmission";
+            this.rbTransmission.Size = new System.Drawing.Size(95, 16);
+            this.rbTransmission.TabIndex = 8;
+            this.rbTransmission.Text = "Transmission";
+            this.rbTransmission.UseVisualStyleBackColor = true;
+            // 
+            // rbqBittorrent
+            // 
+            this.rbqBittorrent.AutoSize = true;
+            this.rbqBittorrent.Checked = true;
+            this.rbqBittorrent.Location = new System.Drawing.Point(8, 20);
+            this.rbqBittorrent.Name = "rbqBittorrent";
+            this.rbqBittorrent.Size = new System.Drawing.Size(89, 16);
+            this.rbqBittorrent.TabIndex = 7;
+            this.rbqBittorrent.TabStop = true;
+            this.rbqBittorrent.Text = "qBittorrent";
+            this.rbqBittorrent.UseVisualStyleBackColor = true;
+            this.rbqBittorrent.CheckedChanged += new System.EventHandler(this.rbqBittorrent_CheckedChanged);
             // 
             // cbKeepConnectSetting
             // 
             this.cbKeepConnectSetting.AutoSize = true;
             this.cbKeepConnectSetting.Checked = true;
             this.cbKeepConnectSetting.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbKeepConnectSetting.Location = new System.Drawing.Point(8, 95);
+            this.cbKeepConnectSetting.Location = new System.Drawing.Point(8, 117);
             this.cbKeepConnectSetting.Name = "cbKeepConnectSetting";
             this.cbKeepConnectSetting.Size = new System.Drawing.Size(96, 16);
             this.cbKeepConnectSetting.TabIndex = 6;
@@ -670,6 +697,8 @@
         private System.Windows.Forms.GroupBox groupBoxQbtSysytem;
         private System.Windows.Forms.RadioButton rbLinux;
         private System.Windows.Forms.RadioButton rbWindows;
+        private System.Windows.Forms.RadioButton rbTransmission;
+        private System.Windows.Forms.RadioButton rbqBittorrent;
     }
 }
 

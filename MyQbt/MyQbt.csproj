@@ -54,6 +54,9 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="Transmission.API.RPC">
+      <HintPath>..\..\qBittorrentAdd\qBittorrentAdd\bin\Debug\Transmission.API.RPC.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddPrefixWithFileName.cs" />

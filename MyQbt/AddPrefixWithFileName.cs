@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Transmission.API.RPC.Entity;
 
 namespace MyQbt
 {
@@ -59,9 +61,10 @@ namespace MyQbt
         public static async Task AddTorrent(
             string torrentPath, BencodeNET.Torrents.Torrent bencodeTorrent,
             string saveFolder, bool skipHashCheck,
-            bool startTorrent, string category,
+            bool startTorrent, string category, Config.BTClient btClient,
             bool isWindowsPath,
-            Dictionary<string, string> actualToVirtualDic = null)
+            Dictionary<string, string> actualToVirtualDic = null,
+            Transmission.API.RPC.Client transmissionClient = null)
         {
             if (bencodeTorrent != null)
             {
@@ -88,10 +91,44 @@ namespace MyQbt
                         }
                     }
 
-                    await QbtWebAPI.API.DownloadFromDisk(
-                        new List<string>() { torrentPath }, strSaveFolderPath,
-                        null, string.IsNullOrWhiteSpace(category) ? null : category,
-                        skipHashCheck, !startTorrent, false, strTitle, null, null, null, null);
+                    if (btClient == Config.BTClient.qBittorrent)
+                    {
+                        await QbtWebAPI.API.DownloadFromDisk(
+                            new List<string>() { torrentPath }, strSaveFolderPath,
+                            null, string.IsNullOrWhiteSpace(category) ? null : category,
+                            skipHashCheck, !startTorrent, false, strTitle, null, null, null, null);
+                    }
+                    else if (btClient == Config.BTClient.Transmission)
+                    {
+                        Debug.Assert(transmissionClient != null);
+                        var addedTorrent = new NewTorrent
+                        {
+                            Metainfo = Helper.GetTransmissionTorrentAddMetainfo(torrentPath),
+                            DownloadDirectory = (
+                                bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single ?
+                                strSaveFolderPath :
+                                Helper.GetDirectoryNameDonntChangeDelimiter(strSaveFolderPath)),
+                            Paused = (
+                                bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single ?
+                                (!startTorrent) : true)
+                        };
+                        var addedTorrentInfo = transmissionClient.TorrentAdd(addedTorrent);
+                        Debug.Assert(addedTorrentInfo != null && addedTorrentInfo.ID != 0);
+
+                        if (bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Multi)
+                        {
+                            var result = transmissionClient.TorrentRenamePath(
+                                addedTorrentInfo.ID,
+                                bencodeTorrent.DisplayName,
+                                Path.GetFileName(strSaveFolderPath));
+                            Debug.Assert(result != null && result.ID != 0);
+
+                            if (startTorrent)
+                            {
+                                transmissionClient.TorrentStartNow(new int[] { result.ID });
+                            }
+                        }
+                    }
                 }
                 else throw new Exception("保存路径包含无效字符");
             }
