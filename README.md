@@ -1,29 +1,20 @@
 # 主要功能
 
-在执行离线功能时请先备份文件夹，qBittorrent的在AppData\Local\qBittorrent\BT_backup，µTorrent的为resume.dat  
-1、添加种子时，自动在保存路径上加上中文名，在qBittorrent上也添加中文名（中文名为添加的种子文件名，可同时添加多个）  
-2、qBittorrent的Tracker替换  
-3、如果种子所对应的实际文件磁盘名改变了，可以修改保存的种子信息，重新对应上，不需重新校验  
-4、辅种功能（勾选跳过hash检测时，检测文件名及大小是否相同，两项都一致可认为是相同文件）  
-5、移除实际文件已不存在的种子  
+在线添加种子，qBittorrent v4.1+ 或 Transmission v2.8+  
+在执行离线功能时，请先备份文件夹或文件，qBittorrent的为%localappdata%\qBittorrent\BT_backup文件夹，µTorrent的为resume.dat文件  
+1、qBittorrent、Transmission在线添加种子，自动在保存文件夹头添加中文（中文名为添加的种子文件名，可同时添加多个）或手动设置  
+2、qBittorrent离线操作fastresume文件，对Tracker、保存路径进行字符串替换  
+3、辅种功能，只需要使实际文件保存在相同路径，即可辅种（勾选跳过hash检测时，检测文件名及大小是否相同，两项都一致可认为是相同文件）  
+4、qBittorrent离线操作fastresume文件，µTorrent离线操作resume.dat文件，移除实际文件已不存在的种子  
 
-## qBittorrent在线功能（需qBittorrent开启Web用户界面，qBittorrent v4.1+以上版本）
+# 主界面
 
-![image](https://github.com/LetCodeGo/MyQbt/blob/master/Images/qBittorrent_online_main.png)
+![image](https://github.com/LetCodeGo/MyQbt/blob/master/Images/main.png)
 
-## qBittorrent离线功能（需关闭qBittorrent）
-
-![image](https://github.com/LetCodeGo/MyQbt/blob/master/Images/qBittorrent_offline_main.png)
-
-## µTorrent离线功能（需关闭µTorrent）
-
-![image](https://github.com/LetCodeGo/MyQbt/blob/master/Images/utorrent_offline_main.png)
-
-# 感谢
-
-感谢以下的项目
+# 感谢以下项目
 
 * [BencodeNET](https://github.com/Krusen/BencodeNET)
 * [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json)
 * [qBittorrentSharp](https://github.com/teug91/qBittorrentSharp)
 * [qBittorrent Web API Documentation](https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation)
+* [Transmission.API.RPC](https://github.com/Beatlegger/Transmission.API.RPC)

@@ -319,7 +319,7 @@ namespace MyQbt
 
                         if (this.cbStartTorrent.Checked)
                         {
-                            transmissionClient.TorrentStartNow(new int[] { result.ID });
+                            transmissionClient.TorrentStartNow(new object[] { result.ID });
                         }
                     }
                 }

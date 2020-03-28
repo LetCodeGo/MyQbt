@@ -125,7 +125,7 @@ namespace MyQbt
 
                             if (startTorrent)
                             {
-                                transmissionClient.TorrentStartNow(new int[] { result.ID });
+                                transmissionClient.TorrentStartNow(new object[] { result.ID });
                             }
                         }
                     }
