@@ -54,10 +54,6 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="Transmission.API.RPC, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\qBittorrentAdd\qBittorrentAdd\bin\Release\Transmission.API.RPC.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddPrefixWithFileName.cs" />
@@ -133,6 +129,10 @@
     <ProjectReference Include="..\QbtWebAPI\QbtWebAPI.csproj">
       <Project>{92ceb65a-b93c-418e-9462-f55cd080a469}</Project>
       <Name>QbtWebAPI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Transmission.API.RPC\Transmission.API.RPC.csproj">
+      <Project>{0d44d5b1-3317-4624-9c28-7db1f6dfb018}</Project>
+      <Name>Transmission.API.RPC</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

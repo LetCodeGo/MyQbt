@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyQbt", "MyQbt\MyQbt.csproj", "{9CAC17DF-D741-4B8C-ACDB-17556038D615}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QbtWebAPI", "QbtWebAPI\QbtWebAPI.csproj", "{92CEB65A-B93C-418E-9462-F55CD080A469}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QbtWebAPI", "QbtWebAPI\QbtWebAPI.csproj", "{92CEB65A-B93C-418E-9462-F55CD080A469}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transmission.API.RPC", "Transmission.API.RPC\Transmission.API.RPC.csproj", "{0D44D5B1-3317-4624-9C28-7DB1F6DFB018}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{92CEB65A-B93C-418E-9462-F55CD080A469}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92CEB65A-B93C-418E-9462-F55CD080A469}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92CEB65A-B93C-418E-9462-F55CD080A469}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D44D5B1-3317-4624-9C28-7DB1F6DFB018}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D44D5B1-3317-4624-9C28-7DB1F6DFB018}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D44D5B1-3317-4624-9C28-7DB1F6DFB018}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D44D5B1-3317-4624-9C28-7DB1F6DFB018}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -184,7 +184,7 @@ namespace MyQbt
             InitializeComponent();
 
             this.isAddTorrentSuccess = false;
-            this.failedReason = "程序错误";
+            this.failedReason = "用户取消";
 
             this.torrentPath = torrentPath;
             this.bencodeTorrent = bencodeTorrent;
@@ -339,8 +339,6 @@ namespace MyQbt
 
         private void BtnCancel_Click(object sender, EventArgs e)
         {
-            this.failedReason = "用户取消";
-
             this.Close();
         }
 
