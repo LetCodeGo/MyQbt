@@ -538,6 +538,8 @@ namespace MyQbt
                     this.cbSkipHashCheck.Checked = false;
                     this.cbSkipHashCheck.Enabled = false;
                 }
+                this.labelCategory.Enabled = (btClient == Config.BTClient.qBittorrent);
+                this.cbCategory.Enabled = (btClient == Config.BTClient.qBittorrent);
 
                 if (btClient == Config.BTClient.qBittorrent) InitComboxCategory();
 

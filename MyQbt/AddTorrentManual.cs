@@ -198,6 +198,10 @@ namespace MyQbt
                 this.cbSkipHashCheck.Checked = false;
                 this.cbSkipHashCheck.Enabled = false;
             }
+
+            this.labelCategory.Enabled = (btClient == Config.BTClient.qBittorrent);
+            this.cbCategory.Enabled = (btClient == Config.BTClient.qBittorrent);
+
             this.cbStartTorrent.Checked = startTorrent;
             this.defaultCategory = category;
             this.btClient = btClient;
@@ -210,13 +214,15 @@ namespace MyQbt
         {
             this.Icon = Properties.Resources.icon;
 
-            this.cbCategory.SuspendLayout();
-            this.cbCategory.Items.Clear();
-            if (btClient == Config.BTClient.qBittorrent)
+            if (this.btClient == Config.BTClient.qBittorrent)
+            {
+                this.cbCategory.SuspendLayout();
+                this.cbCategory.Items.Clear();
                 this.cbCategory.Items.AddRange(
                     (await QbtWebAPI.API.GetAllCategoryString()).ToArray());
-            this.cbCategory.Text = this.defaultCategory;
-            this.cbCategory.ResumeLayout();
+                this.cbCategory.Text = this.defaultCategory;
+                this.cbCategory.ResumeLayout();
+            }
 
             this.trackerList = new List<string>();
             Array.ForEach<IList<string>>(

@@ -32,7 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AddTorrentManual));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.cbCategory = new System.Windows.Forms.ComboBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.labelCategory = new System.Windows.Forms.Label();
             this.cbStartTorrent = new System.Windows.Forms.CheckBox();
             this.cbSkipHashCheck = new System.Windows.Forms.CheckBox();
             this.tbSaveFolder = new System.Windows.Forms.TextBox();
@@ -63,7 +63,7 @@
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.cbCategory);
-            this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Controls.Add(this.labelCategory);
             this.groupBox1.Controls.Add(this.cbStartTorrent);
             this.groupBox1.Controls.Add(this.cbSkipHashCheck);
             this.groupBox1.Controls.Add(this.tbSaveFolder);
@@ -84,14 +84,14 @@
             this.cbCategory.Size = new System.Drawing.Size(278, 20);
             this.cbCategory.TabIndex = 4;
             // 
-            // label1
+            // labelCategory
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(430, 55);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(65, 12);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "Category: ";
+            this.labelCategory.AutoSize = true;
+            this.labelCategory.Location = new System.Drawing.Point(430, 55);
+            this.labelCategory.Name = "labelCategory";
+            this.labelCategory.Size = new System.Drawing.Size(65, 12);
+            this.labelCategory.TabIndex = 3;
+            this.labelCategory.Text = "Category: ";
             // 
             // cbStartTorrent
             // 
@@ -344,7 +344,7 @@
         private System.Windows.Forms.TextBox tbSaveFolder;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.ComboBox cbCategory;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label labelCategory;
         private System.Windows.Forms.CheckBox cbStartTorrent;
         private System.Windows.Forms.CheckBox cbSkipHashCheck;
         private System.Windows.Forms.Label labelInfo;

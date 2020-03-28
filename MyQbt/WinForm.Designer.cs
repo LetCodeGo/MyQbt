@@ -44,7 +44,7 @@
             this.rbWindows = new System.Windows.Forms.RadioButton();
             this.cbSkipHashCheck = new System.Windows.Forms.CheckBox();
             this.cbCategory = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
+            this.labelCategory = new System.Windows.Forms.Label();
             this.cbStartTorrent = new System.Windows.Forms.CheckBox();
             this.btnAddTorrent = new System.Windows.Forms.Button();
             this.groupBoxAddSaveFolder = new System.Windows.Forms.GroupBox();
@@ -206,7 +206,7 @@
             this.groupBoxAdd.Controls.Add(this.groupBoxQbtSysytem);
             this.groupBoxAdd.Controls.Add(this.cbSkipHashCheck);
             this.groupBoxAdd.Controls.Add(this.cbCategory);
-            this.groupBoxAdd.Controls.Add(this.label3);
+            this.groupBoxAdd.Controls.Add(this.labelCategory);
             this.groupBoxAdd.Controls.Add(this.cbStartTorrent);
             this.groupBoxAdd.Controls.Add(this.btnAddTorrent);
             this.groupBoxAdd.Controls.Add(this.groupBoxAddSaveFolder);
@@ -269,14 +269,14 @@
             this.cbCategory.Size = new System.Drawing.Size(391, 20);
             this.cbCategory.TabIndex = 7;
             // 
-            // label3
+            // labelCategory
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(10, 251);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(65, 12);
-            this.label3.TabIndex = 6;
-            this.label3.Text = "Category: ";
+            this.labelCategory.AutoSize = true;
+            this.labelCategory.Location = new System.Drawing.Point(10, 251);
+            this.labelCategory.Name = "labelCategory";
+            this.labelCategory.Size = new System.Drawing.Size(65, 12);
+            this.labelCategory.TabIndex = 6;
+            this.labelCategory.Text = "Category: ";
             // 
             // cbStartTorrent
             // 
@@ -687,7 +687,7 @@
         private System.Windows.Forms.ComboBox cbFindCategory;
         private System.Windows.Forms.CheckBox cbStartTorrent;
         private System.Windows.Forms.ComboBox cbCategory;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label labelCategory;
         private System.Windows.Forms.CheckBox cbKeepConnectSetting;
         private System.Windows.Forms.CheckBox cbSkipHashCheck;
         private System.Windows.Forms.Button buttonOther;
