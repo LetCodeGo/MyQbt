@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -288,6 +289,30 @@ namespace MyQbt
             int index = Math.Max(index1, index2);
             if (index == -1) return "";
             else return path.Substring(0, index);
+        }
+
+        public static Point GetFormRightTopLocation(Form ownerForm)
+        {
+            int ownerTopRightX = ownerForm.Location.X + ownerForm.Width;
+            int ownerTopRightY = ownerForm.Location.Y;
+            int topRightX = ownerTopRightX + 16;
+            int topRightY = ownerTopRightY - 16;
+            Rectangle screenArea = Screen.GetWorkingArea(ownerForm);
+
+            while (!(topRightX >= 0 &&
+                topRightX <= screenArea.Width &&
+                Math.Abs(topRightX - ownerTopRightX) >= 16))
+            {
+                topRightX -= 16;
+            }
+            while (!(topRightY >= 0 &&
+                topRightY <= screenArea.Height &&
+                Math.Abs(topRightY - ownerTopRightY) >= 16))
+            {
+                topRightY += 16;
+            }
+
+            return new Point(topRightX, topRightY);
         }
     }
 }

@@ -663,7 +663,8 @@ namespace MyQbt
                             torrentPath, bencodeTorrent, settingSaveFolder,
                             this.cbSkipHashCheck.Checked,
                             this.cbStartTorrent.Checked, category,
-                            btClient, isWindowsPath, actualToVirtualDic, transmissionClient)
+                            btClient, isWindowsPath, actualToVirtualDic,
+                            transmissionClient, this)
                         {
                             UpdataResultAndReason = this.UpdataManualAddResultAddReason
                         };
@@ -741,7 +742,7 @@ namespace MyQbt
                 }
 
                 string strLog = string.Format("{0}\n{1}", strSuccess, strFailed);
-                InfoForm infoForm = new InfoForm("Add Torrents Log", strLog);
+                InfoForm infoForm = new InfoForm("Add Torrents Log", strLog, this);
                 infoForm.ShowDialog();
             }
         }
@@ -802,8 +803,7 @@ namespace MyQbt
                     "<DomainCategory Domain=\"{0}\" Category=\"{1}\" />\n", kv.Value, kv.Key);
             }
 
-            InfoForm infoForm = new InfoForm(
-                "Domain And Category", strLog);
+            InfoForm infoForm = new InfoForm("Domain And Category", strLog, this);
             infoForm.ShowDialog();
         }
 
@@ -1011,7 +1011,7 @@ namespace MyQbt
                     (i + 1).ToString().PadLeft(digitLen, '0'), logList[i]);
             }
 
-            InfoForm form = new InfoForm("Disk Change Log", strLog);
+            InfoForm form = new InfoForm("Disk Change Log", strLog, this);
             form.ShowDialog();
         }
 
@@ -1097,7 +1097,7 @@ namespace MyQbt
             }
 
             InfoForm form = new InfoForm(
-                "Remove Torrent Whose Data File Not Exist Log", strLog);
+                "Remove Torrent Whose Data File Not Exist Log", strLog, this);
             form.ShowDialog();
         }
 

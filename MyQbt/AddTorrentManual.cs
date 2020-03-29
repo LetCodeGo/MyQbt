@@ -179,9 +179,21 @@ namespace MyQbt
             Config.BTClient btClient,
             bool isWindowsPath,
             Dictionary<string, string> actualToVirtualDic = null,
-            Transmission.API.RPC.Client transmissionClient = null)
+            Transmission.API.RPC.Client transmissionClient = null,
+            Form ownerForm = null)
         {
             InitializeComponent();
+
+            if (ownerForm == null)
+            {
+                this.StartPosition = FormStartPosition.CenterParent;
+            }
+            else
+            {
+                this.StartPosition = FormStartPosition.Manual;
+                Point topRight = Helper.GetFormRightTopLocation(ownerForm);
+                this.Location = new Point(topRight.X - this.Width, topRight.Y);
+            }
 
             this.isAddTorrentSuccess = false;
             this.failedReason = "用户取消";
@@ -346,7 +358,7 @@ namespace MyQbt
         {
             string info = string.Join("\r\n", this.trackerList);
 
-            InfoForm form = new InfoForm("Trackers", info);
+            InfoForm form = new InfoForm("Trackers", info, this);
             form.ShowDialog();
         }
 
