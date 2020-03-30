@@ -295,21 +295,35 @@ namespace MyQbt
         {
             int ownerTopRightX = ownerForm.Location.X + ownerForm.Width;
             int ownerTopRightY = ownerForm.Location.Y;
-            int topRightX = ownerTopRightX + 16;
-            int topRightY = ownerTopRightY - 16;
+
             Rectangle screenArea = Screen.GetWorkingArea(ownerForm);
 
-            while (!(topRightX >= 0 &&
-                topRightX <= screenArea.Width &&
-                Math.Abs(topRightX - ownerTopRightX) >= 16))
+            int topRightX = ownerTopRightX;
+            if (screenArea.Width < 16) topRightX = screenArea.Width;
+            else
             {
-                topRightX -= 16;
+                do
+                {
+                    if (topRightX <= screenArea.Width - 16) topRightX += 16;
+                    else if (topRightX > screenArea.Width - 16) topRightX -= 16;
+                }
+                while (!(topRightX >= 0 &&
+                    topRightX <= screenArea.Width &&
+                    Math.Abs(topRightX - ownerTopRightX) >= 16));
             }
-            while (!(topRightY >= 0 &&
-                topRightY <= screenArea.Height &&
-                Math.Abs(topRightY - ownerTopRightY) >= 16))
+
+            int topRightY = ownerTopRightY;
+            if (screenArea.Height < 16) topRightY = 0;
+            else
             {
-                topRightY += 16;
+                do
+                {
+                    if (topRightY < 16) topRightY += 16;
+                    else if (topRightY >= 16) topRightY -= 16;
+                }
+                while (!(topRightY >= 0 &&
+                    topRightY <= screenArea.Height &&
+                    Math.Abs(topRightY - ownerTopRightY) >= 16));
             }
 
             return new Point(topRightX, topRightY);
