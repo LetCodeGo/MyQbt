@@ -58,7 +58,21 @@ namespace MyQbt
             return (countOfDot > countOfBlank ? "." : " ");
         }
 
-        public static async Task AddTorrent(
+        /// <summary>
+        /// 添加种子，种子文件名作前缀添加进保存路径，返回保存路径
+        /// </summary>
+        /// <param name="torrentPath"></param>
+        /// <param name="bencodeTorrent"></param>
+        /// <param name="saveFolder"></param>
+        /// <param name="skipHashCheck"></param>
+        /// <param name="startTorrent"></param>
+        /// <param name="category"></param>
+        /// <param name="btClient"></param>
+        /// <param name="isWindowsPath"></param>
+        /// <param name="actualToVirtualDic"></param>
+        /// <param name="transmissionClient"></param>
+        /// <returns></returns>
+        public static async Task<string> AddTorrent(
             string torrentPath, BencodeNET.Torrents.Torrent bencodeTorrent,
             string saveFolder, bool skipHashCheck,
             bool startTorrent, string category, Config.BTClient btClient,
@@ -66,72 +80,67 @@ namespace MyQbt
             Dictionary<string, string> actualToVirtualDic = null,
             Transmission.API.RPC.Client transmissionClient = null)
         {
-            if (bencodeTorrent != null)
+            string strTitle =
+                bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single ?
+                Path.GetFileNameWithoutExtension(bencodeTorrent.DisplayName) :
+                bencodeTorrent.DisplayName;
+
+            strTitle = Path.GetFileNameWithoutExtension(torrentPath) +
+                AddDotOrBlank(strTitle) +
+                strTitle;
+
+            string strSaveFolderPath = saveFolder + (isWindowsPath ? "\\" : "/") + strTitle;
+
+            if (Helper.CheckPath(ref strSaveFolderPath, isWindowsPath))
             {
-                string strTitle =
-                    bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single ?
-                    Path.GetFileNameWithoutExtension(bencodeTorrent.DisplayName) :
-                    bencodeTorrent.DisplayName;
-
-                strTitle = Path.GetFileNameWithoutExtension(torrentPath) +
-                    AddDotOrBlank(strTitle) +
-                    strTitle;
-
-                string strSaveFolderPath = saveFolder + (isWindowsPath ? "\\" : "/") + strTitle;
-
-                if (Helper.CheckPath(ref strSaveFolderPath, isWindowsPath))
+                if (skipHashCheck)
                 {
-                    if (skipHashCheck)
-                    {
-                        if (!Helper.CanSkipCheck(
-                            bencodeTorrent,
-                            Helper.GetVirtualPath(strSaveFolderPath, actualToVirtualDic), false))
-                        {
-                            throw new Exception("跳过哈希检测失败");
-                        }
-                    }
+                    Helper.TrySkipCheck(bencodeTorrent,
+                        Helper.GetVirtualPath(strSaveFolderPath, actualToVirtualDic), false);
+                }
 
-                    if (btClient == Config.BTClient.qBittorrent)
+                if (btClient == Config.BTClient.qBittorrent)
+                {
+                    await QbtWebAPI.API.DownloadFromDisk(
+                        new List<string>() { torrentPath }, strSaveFolderPath,
+                        null, string.IsNullOrWhiteSpace(category) ? null : category,
+                        skipHashCheck, !startTorrent, false, strTitle, null, null, null, null);
+                }
+                else if (btClient == Config.BTClient.Transmission)
+                {
+                    Debug.Assert(transmissionClient != null);
+                    var addedTorrent = new NewTorrent
                     {
-                        await QbtWebAPI.API.DownloadFromDisk(
-                            new List<string>() { torrentPath }, strSaveFolderPath,
-                            null, string.IsNullOrWhiteSpace(category) ? null : category,
-                            skipHashCheck, !startTorrent, false, strTitle, null, null, null, null);
-                    }
-                    else if (btClient == Config.BTClient.Transmission)
+                        Metainfo = Helper.GetTransmissionTorrentAddMetainfo(torrentPath),
+                        DownloadDirectory = (
+                            bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single ?
+                            strSaveFolderPath :
+                            Helper.GetDirectoryNameDonntChangeDelimiter(strSaveFolderPath)),
+                        Paused = (
+                            bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single ?
+                            (!startTorrent) : true)
+                    };
+                    var addedTorrentInfo = transmissionClient.TorrentAdd(addedTorrent);
+                    Debug.Assert(addedTorrentInfo != null && addedTorrentInfo.ID != 0);
+
+                    if (bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Multi)
                     {
-                        Debug.Assert(transmissionClient != null);
-                        var addedTorrent = new NewTorrent
-                        {
-                            Metainfo = Helper.GetTransmissionTorrentAddMetainfo(torrentPath),
-                            DownloadDirectory = (
-                                bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single ?
-                                strSaveFolderPath :
-                                Helper.GetDirectoryNameDonntChangeDelimiter(strSaveFolderPath)),
-                            Paused = (
-                                bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single ?
-                                (!startTorrent) : true)
-                        };
-                        var addedTorrentInfo = transmissionClient.TorrentAdd(addedTorrent);
-                        Debug.Assert(addedTorrentInfo != null && addedTorrentInfo.ID != 0);
+                        var result = transmissionClient.TorrentRenamePath(
+                            addedTorrentInfo.ID,
+                            bencodeTorrent.DisplayName,
+                            Path.GetFileName(strSaveFolderPath));
+                        Debug.Assert(result != null && result.ID != 0);
 
-                        if (bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Multi)
+                        if (startTorrent)
                         {
-                            var result = transmissionClient.TorrentRenamePath(
-                                addedTorrentInfo.ID,
-                                bencodeTorrent.DisplayName,
-                                Path.GetFileName(strSaveFolderPath));
-                            Debug.Assert(result != null && result.ID != 0);
-
-                            if (startTorrent)
-                            {
-                                transmissionClient.TorrentStartNow(new object[] { result.ID });
-                            }
+                            transmissionClient.TorrentStartNow(new object[] { result.ID });
                         }
                     }
                 }
-                else throw new Exception("保存路径包含无效字符");
+
+                return strSaveFolderPath;
             }
+            else throw new Exception("保存路径包含无效字符");
         }
     }
 }

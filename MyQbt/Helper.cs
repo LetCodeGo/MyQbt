@@ -227,20 +227,24 @@ namespace MyQbt
             return actualPath;
         }
 
-        public static bool CanSkipCheck(
+        public static bool TrySkipCheck(
             BencodeNET.Torrents.Torrent torrent,
             string virtualSaveFolder, bool hasRootFolder)
         {
-            if (torrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Unknown) return false;
+            if (torrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Unknown)
+            {
+                throw new Exception("跳过哈希检测失败：Torrent FileMode Unknown");
+            }
             else if (torrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Single)
             {
                 string filePath = Path.Combine(virtualSaveFolder, torrent.File.FileName);
                 if (File.Exists(filePath))
                 {
                     FileInfo fi = new FileInfo(filePath);
-                    if (fi.Length != torrent.File.FileSize) return false;
+                    if (fi.Length != torrent.File.FileSize)
+                        throw new Exception(string.Format("跳过哈希检测失败：文件 {0} 的大小不匹配", filePath));
                 }
-                else return false;
+                else throw new Exception(string.Format("跳过哈希检测失败：文件 {0} 不存在", filePath));
             }
             else
             {
@@ -253,9 +257,10 @@ namespace MyQbt
                     if (File.Exists(filePath))
                     {
                         FileInfo fi = new FileInfo(filePath);
-                        if (fi.Length != v.FileSize) return false;
+                        if (fi.Length != v.FileSize)
+                            throw new Exception(string.Format("跳过哈希检测失败：文件 {0} 的大小不匹配", filePath));
                     }
-                    else return false;
+                    else throw new Exception(string.Format("跳过哈希检测失败：文件 {0} 不存在", filePath));
                 }
             }
             return true;

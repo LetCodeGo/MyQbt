@@ -328,7 +328,6 @@
             this.Name = "AddTorrentManual";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "AddTorrentManual";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.AddTorrentManual_FormClosed);
             this.Load += new System.EventHandler(this.AddTorrentManual_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();

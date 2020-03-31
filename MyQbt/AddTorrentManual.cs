@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Transmission.API.RPC.Entity;
 
@@ -17,9 +12,7 @@ namespace MyQbt
 {
     public partial class AddTorrentManual : Form
     {
-        public Action<bool, string> UpdataResultAndReason;
-        private bool isAddTorrentSuccess;
-        private string failedReason;
+        public Action<bool, string, string> UpdataResultAndReason;
 
         private string torrentPath;
         private string settingSaveFolder;
@@ -195,9 +188,6 @@ namespace MyQbt
                 this.Location = new Point(topRight.X - this.Width, topRight.Y);
             }
 
-            this.isAddTorrentSuccess = false;
-            this.failedReason = "用户取消";
-
             this.torrentPath = torrentPath;
             this.bencodeTorrent = bencodeTorrent;
             this.settingSaveFolder = settingSaveFolder;
@@ -284,14 +274,8 @@ namespace MyQbt
             {
                 if (this.cbSkipHashCheck.Checked)
                 {
-                    if (!Helper.CanSkipCheck(
-                        this.bencodeTorrent,
-                        Helper.GetVirtualPath(s1, this.actualToVirtualDic), false))
-                    {
-                        this.isAddTorrentSuccess = false;
-                        this.failedReason = "跳过哈希检测失败";
-                        return;
-                    }
+                    Helper.TrySkipCheck(this.bencodeTorrent,
+                        Helper.GetVirtualPath(s1, this.actualToVirtualDic), false);
                 }
 
                 if (this.btClient == Config.BTClient.qBittorrent)
@@ -336,12 +320,11 @@ namespace MyQbt
                     }
                 }
 
-                this.isAddTorrentSuccess = true;
-                this.failedReason = "";
+                this.UpdataResultAndReason.Invoke(true, s1, null);
             }
             catch (Exception ex)
             {
-                this.failedReason = ex.Message;
+                this.UpdataResultAndReason.Invoke(false, null, ex.Message);
             }
             finally
             {
@@ -527,12 +510,6 @@ namespace MyQbt
             this.listViewNodeList.Clear();
             GenerateListViewDataFromDataNode(this.rootNode, ref this.listViewNodeList);
             this.listView.VirtualListSize = this.listViewNodeList.Count;
-        }
-
-        private void AddTorrentManual_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            this.UpdataResultAndReason?.Invoke(
-                this.isAddTorrentSuccess, this.failedReason);
         }
     }
 }

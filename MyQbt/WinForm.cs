@@ -27,6 +27,7 @@ namespace MyQbt
         private Config configData;
 
         private bool isManualAddSuccess;
+        private string manualAddSaveFolderPath;
         private string manualAddFailedReason;
 
         private Func<bool> CheckµTorrentNeedSave = null;
@@ -643,13 +644,15 @@ namespace MyQbt
                     {
                         try
                         {
-                            await AddPrefixWithFileName.AddTorrent(
+                            string strTemp = await AddPrefixWithFileName.AddTorrent(
                                 torrentPath, bencodeTorrent, settingSaveFolder,
                                 this.cbSkipHashCheck.Checked,
                                 this.cbStartTorrent.Checked, category,
                                 btClient, isWindowsPath, actualToVirtualDic, transmissionClient);
 
-                            successList.Add(torrentPath);
+                            successList.Add(string.Join("|", new string[] {
+                                torrentPath, bencodeTorrent.FileMode.ToString(),
+                                bencodeTorrent.DisplayName, "False", strTemp }));
                             UpdataComboxSettingSaveFolder(settingSaveFolder);
                         }
                         catch (Exception ex)
@@ -672,26 +675,24 @@ namespace MyQbt
 
                         if (this.isManualAddSuccess)
                         {
-                            successList.Add(torrentPath);
+                            successList.Add(string.Join("|", new string[] {
+                                torrentPath, bencodeTorrent.FileMode.ToString(),
+                                bencodeTorrent.DisplayName, "False", this.manualAddSaveFolderPath }));
                             UpdataComboxSettingSaveFolder(settingSaveFolder);
                         }
                         else failedDic.Add(torrentPath, this.manualAddFailedReason);
                     }
                     else
                     {
-                        bool hasRootFolder =
-                            (bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Multi);
-
-                        if (this.cbSkipHashCheck.Checked &&
-                            (!Helper.CanSkipCheck(bencodeTorrent,
-                            Helper.GetVirtualPath(settingSaveFolder, actualToVirtualDic), hasRootFolder)))
-                        {
-                            failedDic.Add(torrentPath, "跳过哈希检测失败");
-                            continue;
-                        }
-
                         try
                         {
+                            if (this.cbSkipHashCheck.Checked)
+                            {
+                                Helper.TrySkipCheck(bencodeTorrent,
+                                    Helper.GetVirtualPath(settingSaveFolder, actualToVirtualDic),
+                                    bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Multi);
+                            }
+
                             if (btClient == Config.BTClient.qBittorrent)
                             {
                                 await QbtWebAPI.API.DownloadFromDisk(
@@ -712,7 +713,9 @@ namespace MyQbt
                                 Debug.Assert(addedTorrentInfo != null && addedTorrentInfo.ID != 0);
                             }
 
-                            successList.Add(torrentPath);
+                            successList.Add(string.Join("|", new string[] {
+                                torrentPath, bencodeTorrent.FileMode.ToString(),
+                                bencodeTorrent.DisplayName, "True", settingSaveFolder }));
                             UpdataComboxSettingSaveFolder(settingSaveFolder);
                         }
                         catch (Exception ex)
@@ -724,14 +727,37 @@ namespace MyQbt
 
                 string strSuccess = string.Format("Success: {0}\n", successList.Count);
                 int sdl = successList.Count.ToString().Length;
+                if (sdl < 2) sdl = 2;
                 for (int i = 0; i < successList.Count; i++)
                 {
-                    strSuccess += string.Format("{0} {1}\n",
-                        (i + 1).ToString().PadLeft(sdl, '0'), successList[i]);
+                    string[] ss = successList[i].Split(new char[] { '|' });
+                    if (ss == null || ss.Length != 5)
+                    {
+                        strSuccess += string.Format("{0} {1}\n",
+                            (i + 1).ToString().PadLeft(sdl, '0'), successList[i]);
+                    }
+                    else
+                    {
+                        strSuccess += string.Format("{0} {1}\n",
+                            (i + 1).ToString().PadLeft(sdl, '0'), ss[0]);
+                        strSuccess += string.Format("{0} Torrent FileMode   ：{1}\n",
+                            " ".PadLeft(sdl, ' '), ss[1]);
+                        strSuccess += string.Format("{0} Torrent DisplayName：{1}\n",
+                            " ".PadLeft(sdl, ' '), ss[2]);
+                        strSuccess += string.Format("{0} Create Root Folder ：{1}\n",
+                            " ".PadLeft(sdl, ' '), ss[3]);
+                        strSuccess += string.Format("{0} Save Folder        ：{1}\n",
+                            " ".PadLeft(sdl, ' '), ss[4]);
+                    }
+                    if (i != successList.Count - 1)
+                    {
+                        strSuccess += "-----------------------------------------------------\n";
+                    }
                 }
 
                 string strFailed = string.Format("Failed: {0}\n", failedDic.Count);
                 int fdl = failedDic.Count.ToString().Length;
+                if (fdl < 2) fdl = 2;
                 int j = 1;
                 foreach (KeyValuePair<string, string> kv in failedDic)
                 {
@@ -818,9 +844,10 @@ namespace MyQbt
         }
 
         private void UpdataManualAddResultAddReason(
-            bool isAddTorrentSuccess, string failedReason)
+            bool isAddTorrentSuccess, string saveFolderPath, string failedReason)
         {
             this.isManualAddSuccess = isAddTorrentSuccess;
+            this.manualAddSaveFolderPath = saveFolderPath;
             this.manualAddFailedReason = failedReason;
         }
 
