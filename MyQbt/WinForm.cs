@@ -764,6 +764,10 @@ namespace MyQbt
                     strFailed += string.Format("{0} {1}\n{2} {3}\n",
                         j.ToString().PadLeft(fdl, '0'), kv.Key,
                         " ".PadLeft(fdl, ' '), kv.Value);
+                    if (j != failedDic.Count)
+                    {
+                        strFailed += "-----------------------------------------------------\n";
+                    }
                     j++;
                 }
 
