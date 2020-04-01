@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QbtWebAPI;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -21,6 +22,10 @@ namespace MyQbt
         private static readonly string configPath = Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory, "MyQbtConfig.xml");
 
+        private string btClientVersion = "";
+
+        public static bool IsConnectDisconnected { get; private set; }
+
         private Config.BTClient btClient = Config.BTClient.qBittorrent;
         private Transmission.API.RPC.Client transmissionClient = null;
 
@@ -37,6 +42,14 @@ namespace MyQbt
         public WinForm()
         {
             InitializeComponent();
+
+            QbtWebAPI.API.Disconnected += QbtConnectDisconnected;
+            AddPrefixWithFileName.LoginAndCheck += LoginAndCheckClientVersion;
+        }
+
+        private void QbtConnectDisconnected(object sender, EventArgs e)
+        {
+            IsConnectDisconnected = true;
         }
 
         private void WinForm_Load(object sender, EventArgs e)
@@ -82,7 +95,8 @@ namespace MyQbt
                     catch (Exception ex)
                     {
                         MessageBox.Show(string.Format(
-                            "密码解密失败，请重新设置密码！\n{0}\n配置文件复制到另一电脑会导致此问题", ex.Message));
+                            "密码解密失败，请重新设置密码！\n{0}\n配置文件复制到另一电脑会导致此问题", 
+                            Helper.GetExceptionAllMessage(ex)));
                     }
                     this.tbPassword.Text = decryptedPassword;
                 }
@@ -432,7 +446,8 @@ namespace MyQbt
                 catch (Exception ex)
                 {
                     MessageBox.Show(string.Format(
-                        "密码解密失败，请重新设置密码！\n{0}\n配置文件复制到另一电脑会导致此问题", ex.Message));
+                        "密码解密失败，请重新设置密码！\n{0}\n配置文件复制到另一电脑会导致此问题", 
+                        Helper.GetExceptionAllMessage(ex)));
                 }
                 this.tbPassword.Text = decryptedPassword;
             }
@@ -480,22 +495,22 @@ namespace MyQbt
             this.groupBoxOnlineOther.Enabled = false;
         }
 
-        private async void BtnLogin_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 登录并返回错误信息，返回null表示登录成功，其余为失败错误信息
+        /// </summary>
+        /// <returns></returns>
+        private async Task<string> LoginAndCheckClientVersion()
         {
-            bool? flag = null;
-            bool isVersionValid = false;
-            string errMsg = "";
-            string btClientVersion = "";
+            string errMsg = null;
             try
             {
                 if (btClient == Config.BTClient.qBittorrent)
                 {
                     QbtWebAPI.API.Initialize(this.cbUrl.Text);
-                    flag = await QbtWebAPI.API.Login(
+                    await QbtWebAPI.API.Login(
                         this.tbUser.Text, this.tbPassword.Text);
                     btClientVersion = await QbtWebAPI.API.GetQbittorrentVersion();
-                    isVersionValid = (string.Compare(btClientVersion, "v4.1", true) >= 0);
-                    if (!isVersionValid)
+                    if (string.Compare(btClientVersion, "v4.1", true) < 0)
                         errMsg = string.Format(
                             "qBittorrent 当前版本为 {0}，需 >=v4.1", btClientVersion);
                 }
@@ -508,21 +523,22 @@ namespace MyQbt
                     var info = transmissionClient.GetSessionInformation();
                     Debug.Assert(info != null && info.Version != null);
                     btClientVersion = "v" + info.Version;
-                    flag = true;
-                    isVersionValid = (string.Compare(btClientVersion, "v2.8", true) >= 0);
-                    if (!isVersionValid)
+                    if (string.Compare(btClientVersion, "v2.8", true) < 0)
                         errMsg = string.Format(
                             "Transmission 当前版本为 {0}，需 >=v2.8", btClientVersion);
                 }
             }
             catch (Exception ex)
             {
-                flag = null;
-                errMsg = string.Format("{0}{1}", ex.Message,
-                    (ex.InnerException != null) ? ex.InnerException.Message : "");
+                errMsg = Helper.GetExceptionAllMessage(ex);
             }
+            return errMsg;
+        }
 
-            if ((flag ?? false) && isVersionValid)
+        private async void BtnLogin_Click(object sender, EventArgs e)
+        {
+            string errMsg = await LoginAndCheckClientVersion();
+            if (errMsg == null)
             {
                 Uri uri = new Uri(this.cbUrl.Text);
                 this.Text = string.Format("[{0} {1}]@{2}:{3} [MyQbt v{4}]",
@@ -615,8 +631,12 @@ namespace MyQbt
                 BencodeNET.Objects.BString trackersBString =
                     new BencodeNET.Objects.BString("trackers");
 
+                int loginCount = 1;
                 foreach (string torrentPath in dlg.FileNames)
                 {
+                    bool needTryAgain = true;
+                    string errMsg = "";
+
                     var bencodeParser = new BencodeNET.Parsing.BencodeParser();
                     var bencodeTorrent = bencodeParser.Parse<BencodeNET.Torrents.Torrent>(torrentPath);
 
@@ -657,7 +677,7 @@ namespace MyQbt
                         }
                         catch (Exception ex)
                         {
-                            failedDic.Add(torrentPath, ex.Message);
+                            failedDic.Add(torrentPath, Helper.GetExceptionAllMessage(ex));
                         }
                     }
                     else if (this.rbManual.Checked)
@@ -669,7 +689,8 @@ namespace MyQbt
                             btClient, isWindowsPath, actualToVirtualDic,
                             transmissionClient, this)
                         {
-                            UpdataResultAndReason = this.UpdataManualAddResultAddReason
+                            UpdataResultAndReason = this.UpdataManualAddResultAddReason,
+                            LoginAndCheck = this.LoginAndCheckClientVersion
                         };
                         form.ShowDialog();
 
@@ -695,11 +716,36 @@ namespace MyQbt
 
                             if (btClient == Config.BTClient.qBittorrent)
                             {
-                                await QbtWebAPI.API.DownloadFromDisk(
-                                    new List<string>() { torrentPath }, settingSaveFolder,
-                                    null, string.IsNullOrWhiteSpace(category) ? null : category,
-                                    this.cbSkipHashCheck.Checked, !this.cbStartTorrent.Checked,
-                                    null, bencodeTorrent.DisplayName, null, null, null, null);
+                                do
+                                {
+                                    try
+                                    {
+                                        await QbtWebAPI.API.DownloadFromDisk(
+                                            new List<string>() { torrentPath }, settingSaveFolder,
+                                            null, string.IsNullOrWhiteSpace(category) ? null : category,
+                                            this.cbSkipHashCheck.Checked, !this.cbStartTorrent.Checked,
+                                            null, bencodeTorrent.DisplayName, null, null, null, null);
+                                        needTryAgain = false;
+                                    }
+                                    catch (QBTException ex)
+                                    {
+                                        needTryAgain = (loginCount-- > 0 &&
+                                            WinForm.IsConnectDisconnected &&
+                                            (errMsg = await LoginAndCheckClientVersion()) == null);
+
+                                        if (!needTryAgain)
+                                        {
+                                            if (loginCount == 0 || errMsg == null)
+                                                throw new Exception(string.Format(
+                                                    "HttpStatusCode：{0} {1}",
+                                                    Convert.ToInt32(ex.HttpStatusCode),
+                                                    Helper.GetExceptionAllMessage(ex)));
+                                            else throw new Exception(errMsg);
+                                        }
+                                    }
+                                    catch (Exception ex) { throw ex; }
+                                }
+                                while (needTryAgain);
                             }
                             else if (btClient == Config.BTClient.Transmission)
                             {
@@ -720,7 +766,7 @@ namespace MyQbt
                         }
                         catch (Exception ex)
                         {
-                            failedDic.Add(torrentPath, ex.Message);
+                            failedDic.Add(torrentPath, Helper.GetExceptionAllMessage(ex));
                         }
                     }
                 }

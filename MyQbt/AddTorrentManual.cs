@@ -1,10 +1,12 @@
-﻿using System;
+﻿using QbtWebAPI;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Transmission.API.RPC.Entity;
 
@@ -13,6 +15,7 @@ namespace MyQbt
     public partial class AddTorrentManual : Form
     {
         public Action<bool, string, string> UpdataResultAndReason;
+        public Func<Task<string>> LoginAndCheck;
 
         private string torrentPath;
         private string settingSaveFolder;
@@ -43,6 +46,8 @@ namespace MyQbt
 
         private Config.BTClient btClient = Config.BTClient.qBittorrent;
         private Transmission.API.RPC.Client transmissionClient = null;
+
+        private bool formClosedByClickBtnOK = false;
 
         public class DataNode
         {
@@ -218,10 +223,51 @@ namespace MyQbt
 
             if (this.btClient == Config.BTClient.qBittorrent)
             {
+                int loginCount = 1;
+                bool needTryAgain = true;
+                string errMsg = "";
+                List<string> categoryList = null;
+
+                try
+                {
+                    do
+                    {
+                        try
+                        {
+                            categoryList = await QbtWebAPI.API.GetAllCategoryString();
+                            needTryAgain = false;
+                        }
+                        catch (QBTException ex)
+                        {
+                            needTryAgain = (loginCount-- > 0 &&
+                                WinForm.IsConnectDisconnected &&
+                                LoginAndCheck != null &&
+                                (errMsg = await LoginAndCheck.Invoke()) == null);
+
+                            if (!needTryAgain)
+                            {
+                                if (loginCount == 0 || LoginAndCheck == null || errMsg == null)
+                                    throw new Exception(string.Format(
+                                        "HttpStatusCode：{0} {1}",
+                                        Convert.ToInt32(ex.HttpStatusCode),
+                                        Helper.GetExceptionAllMessage(ex)));
+                                else throw new Exception(errMsg);
+                            }
+                        }
+                        catch (Exception ex) { throw ex; }
+                    }
+                    while (needTryAgain);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(Helper.GetExceptionAllMessage(ex), "提示",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    categoryList = new List<string>();
+                }
+
                 this.cbCategory.SuspendLayout();
                 this.cbCategory.Items.Clear();
-                this.cbCategory.Items.AddRange(
-                    (await QbtWebAPI.API.GetAllCategoryString()).ToArray());
+                this.cbCategory.Items.AddRange(categoryList.ToArray());
                 this.cbCategory.Text = this.defaultCategory;
                 this.cbCategory.ResumeLayout();
             }
@@ -278,15 +324,45 @@ namespace MyQbt
                         Helper.GetVirtualPath(s1, this.actualToVirtualDic), false);
                 }
 
+                int loginCount = 1;
+                bool needTryAgain = true;
+                string errMsg = "";
+
                 if (this.btClient == Config.BTClient.qBittorrent)
                 {
-                    await QbtWebAPI.API.DownloadFromDisk(
-                        new List<string>() { torrentPath },
-                        s1, null,
-                        string.IsNullOrWhiteSpace(this.cbCategory.Text) ?
-                        null : this.cbCategory.Text,
-                        this.cbSkipHashCheck.Checked, !this.cbStartTorrent.Checked,
-                        false, s2, null, null, null, null);
+                    do
+                    {
+                        try
+                        {
+                            await QbtWebAPI.API.DownloadFromDisk(
+                                new List<string>() { torrentPath },
+                                s1, null,
+                                string.IsNullOrWhiteSpace(this.cbCategory.Text) ?
+                                null : this.cbCategory.Text,
+                                this.cbSkipHashCheck.Checked, !this.cbStartTorrent.Checked,
+                                false, s2, null, null, null, null);
+                            needTryAgain = false;
+                        }
+                        catch (QBTException ex)
+                        {
+                            needTryAgain = (loginCount-- > 0 &&
+                                WinForm.IsConnectDisconnected &&
+                                LoginAndCheck != null &&
+                                (errMsg = await LoginAndCheck.Invoke()) == null);
+
+                            if (!needTryAgain)
+                            {
+                                if (loginCount == 0 || LoginAndCheck == null || errMsg == null)
+                                    throw new Exception(string.Format(
+                                        "HttpStatusCode：{0} {1}",
+                                        Convert.ToInt32(ex.HttpStatusCode),
+                                        Helper.GetExceptionAllMessage(ex)));
+                                else throw new Exception(errMsg);
+                            }
+                        }
+                        catch (Exception ex) { throw ex; }
+                    }
+                    while (needTryAgain);
                 }
                 else if (this.btClient == Config.BTClient.Transmission)
                 {
@@ -324,10 +400,11 @@ namespace MyQbt
             }
             catch (Exception ex)
             {
-                this.UpdataResultAndReason.Invoke(false, null, ex.Message);
+                this.UpdataResultAndReason.Invoke(false, null, Helper.GetExceptionAllMessage(ex));
             }
             finally
             {
+                this.formClosedByClickBtnOK = true;
                 this.Close();
             }
         }
@@ -510,6 +587,14 @@ namespace MyQbt
             this.listViewNodeList.Clear();
             GenerateListViewDataFromDataNode(this.rootNode, ref this.listViewNodeList);
             this.listView.VirtualListSize = this.listViewNodeList.Count;
+        }
+
+        private void AddTorrentManual_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (!this.formClosedByClickBtnOK)
+            {
+                this.UpdataResultAndReason.Invoke(false, null, "用户取消");
+            }
         }
     }
 }

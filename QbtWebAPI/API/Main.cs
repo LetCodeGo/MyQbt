@@ -9,6 +9,7 @@ using System.IO;
 using QbtWebAPI.Enums;
 using Newtonsoft.Json.Linq;
 using QbtWebAPI.Data;
+using System.Text;
 
 namespace QbtWebAPI
 {
@@ -64,7 +65,13 @@ namespace QbtWebAPI
             var result = await reply.Content.ReadAsStringAsync();
 
             if (result == "Ok.")
+            {
+                var header = new System.Net.Http.Headers.AuthenticationHeaderValue(
+                    "Basic", Convert.ToBase64String(
+                        Encoding.UTF8.GetBytes(username + ":" + password)));
+                client.DefaultRequestHeaders.Authorization = header;
                 return true;
+            }
             else throw new Exception("Login Failed");
         }
 

@@ -80,15 +80,15 @@ namespace QbtWebAPI
                 return reply;
             }
 
-            catch (HttpRequestException)
+            catch (HttpRequestException ex)
             {
-                return null;
+                throw ex;
             }
 
-            catch (TaskCanceledException)
+            catch (TaskCanceledException ex)
             {
                 RaiseDisconnectedEvent();
-                return null;
+                throw ex;
             }
         }
 

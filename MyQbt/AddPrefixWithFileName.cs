@@ -1,8 +1,10 @@
-﻿using System;
+﻿using QbtWebAPI;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -12,6 +14,8 @@ namespace MyQbt
 {
     public class AddPrefixWithFileName
     {
+        public static Func<Task<string>> LoginAndCheck = null;
+
         /// <summary>
         /// 间隔符是 空格 还是 点
         /// </summary>
@@ -99,12 +103,42 @@ namespace MyQbt
                         Helper.GetVirtualPath(strSaveFolderPath, actualToVirtualDic), false);
                 }
 
+                int loginCount = 1;
+                bool needTryAgain = true;
+                string errMsg = "";
+
                 if (btClient == Config.BTClient.qBittorrent)
                 {
-                    await QbtWebAPI.API.DownloadFromDisk(
-                        new List<string>() { torrentPath }, strSaveFolderPath,
-                        null, string.IsNullOrWhiteSpace(category) ? null : category,
-                        skipHashCheck, !startTorrent, false, strTitle, null, null, null, null);
+                    do
+                    {
+                        try
+                        {
+                            await QbtWebAPI.API.DownloadFromDisk(
+                                new List<string>() { torrentPath }, strSaveFolderPath,
+                                null, string.IsNullOrWhiteSpace(category) ? null : category,
+                                skipHashCheck, !startTorrent, false, strTitle, null, null, null, null);
+                            needTryAgain = false;
+                        }
+                        catch (QBTException ex)
+                        {
+                            needTryAgain = (loginCount-- > 0 &&
+                                WinForm.IsConnectDisconnected &&
+                                LoginAndCheck != null &&
+                                (errMsg = await LoginAndCheck.Invoke()) == null);
+
+                            if (!needTryAgain)
+                            {
+                                if (loginCount == 0 || LoginAndCheck == null || errMsg == null)
+                                    throw new Exception(string.Format(
+                                        "HttpStatusCode：{0} {1}",
+                                        Convert.ToInt32(ex.HttpStatusCode),
+                                        Helper.GetExceptionAllMessage(ex)));
+                                else throw new Exception(errMsg);
+                            }
+                        }
+                        catch (Exception ex) { throw ex; }
+                    }
+                    while (needTryAgain);
                 }
                 else if (btClient == Config.BTClient.Transmission)
                 {

@@ -333,5 +333,12 @@ namespace MyQbt
 
             return new Point(topRightX, topRightY);
         }
+
+        public static string GetExceptionAllMessage(Exception ex)
+        {
+            if (ex == null) return "";
+            else if (ex.InnerException == null) return ex.Message;
+            else return ex.Message + GetExceptionAllMessage(ex.InnerException);
+        }
     }
 }
