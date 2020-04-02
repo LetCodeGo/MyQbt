@@ -121,20 +121,25 @@ namespace MyQbt
                         }
                         catch (QBTException ex)
                         {
-                            needTryAgain = (loginCount-- > 0 &&
+                            needTryAgain = (loginCount > 0 &&
                                 WinForm.IsConnectDisconnected &&
+                                ex.HttpStatusCode == HttpStatusCode.Forbidden &&
                                 LoginAndCheck != null &&
                                 (errMsg = await LoginAndCheck.Invoke()) == null);
 
                             if (!needTryAgain)
                             {
-                                if (loginCount == 0 || LoginAndCheck == null || errMsg == null)
+                                if (loginCount == 0 ||
+                                    ex.HttpStatusCode != HttpStatusCode.Forbidden ||
+                                    LoginAndCheck == null ||
+                                    errMsg == null)
                                     throw new Exception(string.Format(
                                         "HttpStatusCode：{0} {1}",
                                         Convert.ToInt32(ex.HttpStatusCode),
                                         Helper.GetExceptionAllMessage(ex)));
                                 else throw new Exception(errMsg);
                             }
+                            else loginCount--;
                         }
                         catch (Exception ex) { throw ex; }
                     }

@@ -9,7 +9,6 @@ using System.IO;
 using QbtWebAPI.Enums;
 using Newtonsoft.Json.Linq;
 using QbtWebAPI.Data;
-using System.Text;
 
 namespace QbtWebAPI
 {
@@ -66,10 +65,32 @@ namespace QbtWebAPI
 
             if (result == "Ok.")
             {
-                var header = new System.Net.Http.Headers.AuthenticationHeaderValue(
-                    "Basic", Convert.ToBase64String(
-                        Encoding.UTF8.GetBytes(username + ":" + password)));
-                client.DefaultRequestHeaders.Authorization = header;
+                //client.DefaultRequestHeaders.Authorization =
+                //    new System.Net.Http.Headers.AuthenticationHeaderValue(
+                //    "Basic", Convert.ToBase64String(
+                //        Encoding.UTF8.GetBytes(username + ":" + password)));
+
+                //var cookies = reply.Headers.GetValues("Set-Cookie");
+                //if (cookies != null)
+                //{
+                //    string SID = null;
+                //    bool breakFlag = false;
+                //    foreach (string cookie in cookies)
+                //    {
+                //        string[] kvs = cookie.Split(new char[] { ';' },
+                //            StringSplitOptions.RemoveEmptyEntries);
+                //        foreach (string kv in kvs)
+                //        {
+                //            string[] vv = kv.Trim().Split(new char[] { '=' });
+                //            if (vv.Length == 2 && vv[0] == "SID")
+                //            { SID = vv[1]; breakFlag = true; break; }
+                //        }
+                //        if (breakFlag) break;
+                //    }
+                //    if (SID != null)
+                //        client.DefaultRequestHeaders.Add("Cookie", string.Format("SID={0};", SID));
+                //}
+
                 return true;
             }
             else throw new Exception("Login Failed");

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -38,6 +39,14 @@ namespace MyQbt
         private Func<bool> CheckµTorrentNeedSave = null;
 
         private Dictionary<string, string> domainCategoryDic = null;
+
+        private class LoginInfo
+        {
+            public string Address;
+            public string UserName;
+            public string Password;
+        }
+        private LoginInfo validLoginInfo = null;
 
         public WinForm()
         {
@@ -95,7 +104,7 @@ namespace MyQbt
                     catch (Exception ex)
                     {
                         MessageBox.Show(string.Format(
-                            "密码解密失败，请重新设置密码！\n{0}\n配置文件复制到另一电脑会导致此问题", 
+                            "密码解密失败，请重新设置密码！\n{0}\n配置文件复制到另一电脑会导致此问题",
                             Helper.GetExceptionAllMessage(ex)));
                     }
                     this.tbPassword.Text = decryptedPassword;
@@ -446,7 +455,7 @@ namespace MyQbt
                 catch (Exception ex)
                 {
                     MessageBox.Show(string.Format(
-                        "密码解密失败，请重新设置密码！\n{0}\n配置文件复制到另一电脑会导致此问题", 
+                        "密码解密失败，请重新设置密码！\n{0}\n配置文件复制到另一电脑会导致此问题",
                         Helper.GetExceptionAllMessage(ex)));
                 }
                 this.tbPassword.Text = decryptedPassword;
@@ -501,14 +510,16 @@ namespace MyQbt
         /// <returns></returns>
         private async Task<string> LoginAndCheckClientVersion()
         {
+            if (this.validLoginInfo == null) return "输入的网址、用户名或密码不正确";
+
             string errMsg = null;
             try
             {
                 if (btClient == Config.BTClient.qBittorrent)
                 {
-                    QbtWebAPI.API.Initialize(this.cbUrl.Text);
+                    QbtWebAPI.API.Initialize(this.validLoginInfo.Address);
                     await QbtWebAPI.API.Login(
-                        this.tbUser.Text, this.tbPassword.Text);
+                        this.validLoginInfo.UserName, this.validLoginInfo.Password);
                     btClientVersion = await QbtWebAPI.API.GetQbittorrentVersion();
                     if (string.Compare(btClientVersion, "v4.1", true) < 0)
                         errMsg = string.Format(
@@ -518,8 +529,8 @@ namespace MyQbt
                 {
                     transmissionClient = new Transmission.API.RPC.Client(
                         string.Format("{0}/transmission/rpc",
-                        this.cbUrl.Text.Replace('\\', '/').TrimEnd(new char[] { '/' })),
-                        null, this.tbUser.Text, this.tbPassword.Text);
+                        this.validLoginInfo.Address.Replace('\\', '/').TrimEnd(new char[] { '/' })),
+                        null, this.validLoginInfo.UserName, this.validLoginInfo.Password);
                     var info = transmissionClient.GetSessionInformation();
                     Debug.Assert(info != null && info.Version != null);
                     btClientVersion = "v" + info.Version;
@@ -537,10 +548,17 @@ namespace MyQbt
 
         private async void BtnLogin_Click(object sender, EventArgs e)
         {
+            this.validLoginInfo = new LoginInfo()
+            {
+                Address = this.cbUrl.Text,
+                UserName = this.tbUser.Text,
+                Password = this.tbPassword.Text
+            };
+
             string errMsg = await LoginAndCheckClientVersion();
             if (errMsg == null)
             {
-                Uri uri = new Uri(this.cbUrl.Text);
+                Uri uri = new Uri(this.validLoginInfo.Address);
                 this.Text = string.Format("[{0} {1}]@{2}:{3} [MyQbt v{4}]",
                     btClient == Config.BTClient.qBittorrent ? "qBittorrent" : "Transmission",
                     btClientVersion, uri.Host, uri.Port, Application.ProductVersion);
@@ -566,28 +584,29 @@ namespace MyQbt
                 if (this.cbKeepConnectSetting.Checked)
                 {
                     Config.Connect c1 = configData.ConnectList.Find(
-                        x => x.Url == this.cbUrl.Text);
-                    string encryptedPassword = Helper.Encryption(this.tbPassword.Text);
+                        x => x.Url == this.validLoginInfo.Address);
+                    string encryptedPassword = Helper.Encryption(this.validLoginInfo.Password);
                     if (c1 == null)
                     {
                         c1 = new Config.Connect
                         {
-                            Url = this.cbUrl.Text,
-                            User = this.tbUser.Text,
+                            Url = this.validLoginInfo.Address,
+                            User = this.validLoginInfo.UserName,
                             Password = encryptedPassword
                         };
                         configData.ConnectList.Add(c1);
-                        this.cbUrl.Items.Add(this.cbUrl.Text);
+                        this.cbUrl.Items.Add(this.validLoginInfo.Address);
                     }
                     else
                     {
-                        c1.User = this.tbUser.Text;
+                        c1.User = this.validLoginInfo.UserName;
                         c1.Password = encryptedPassword;
                     }
                 }
             }
             else
             {
+                this.validLoginInfo = null;
                 this.groupBoxAdd.Enabled = false;
                 this.groupBoxOnlineOther.Enabled = false;
                 MessageBox.Show(errMsg, "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -729,19 +748,23 @@ namespace MyQbt
                                     }
                                     catch (QBTException ex)
                                     {
-                                        needTryAgain = (loginCount-- > 0 &&
+                                        needTryAgain = (loginCount > 0 &&
                                             WinForm.IsConnectDisconnected &&
+                                            ex.HttpStatusCode == HttpStatusCode.Forbidden &&
                                             (errMsg = await LoginAndCheckClientVersion()) == null);
 
                                         if (!needTryAgain)
                                         {
-                                            if (loginCount == 0 || errMsg == null)
+                                            if (loginCount == 0 ||
+                                                ex.HttpStatusCode != HttpStatusCode.Forbidden ||
+                                                errMsg == null)
                                                 throw new Exception(string.Format(
                                                     "HttpStatusCode：{0} {1}",
                                                     Convert.ToInt32(ex.HttpStatusCode),
                                                     Helper.GetExceptionAllMessage(ex)));
                                             else throw new Exception(errMsg);
                                         }
+                                        else loginCount--;
                                     }
                                     catch (Exception ex) { throw ex; }
                                 }
