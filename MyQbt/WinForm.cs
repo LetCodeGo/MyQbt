@@ -668,14 +668,22 @@ namespace MyQbt
 
                     string category = this.cbCategory.Text.Trim();
 
-                    if (string.IsNullOrWhiteSpace(category) &&
-                        bencodeTorrent.Trackers.Count == 1 &&
-                        bencodeTorrent.Trackers[0].Count == 1)
+                    if (string.IsNullOrWhiteSpace(category) && bencodeTorrent.Trackers != null)
                     {
-                        string trackerDomain = (new Uri(bencodeTorrent.Trackers[0][0])).Host;
-                        if (this.domainCategoryDic.ContainsKey(trackerDomain))
+                        bool finded = false;
+                        foreach(IList<string> trackerList in bencodeTorrent.Trackers)
                         {
-                            category = this.domainCategoryDic[trackerDomain];
+                            foreach(string strTracker in trackerList)
+                            {
+                                string trackerDomain = (new Uri(strTracker)).Host;
+                                if (this.domainCategoryDic.ContainsKey(trackerDomain))
+                                {
+                                    category = this.domainCategoryDic[trackerDomain];
+                                    finded = true;
+                                    break;
+                                }
+                            }
+                            if (finded) break;
                         }
                     }
 
