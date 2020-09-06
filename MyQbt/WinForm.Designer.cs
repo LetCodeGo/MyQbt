@@ -77,6 +77,9 @@
             this.cbSavePathReplace = new System.Windows.Forms.ComboBox();
             this.cbSavePathFind = new System.Windows.Forms.ComboBox();
             this.tabPageµTorrentOffline = new System.Windows.Forms.TabPage();
+            this.btnU2Tracker = new System.Windows.Forms.Button();
+            this.labelU2PasskeyQueryAPI = new System.Windows.Forms.Label();
+            this.textBoxU2PasskeyQueryAPI = new System.Windows.Forms.TextBox();
             this.tabControl.SuspendLayout();
             this.tabPageqBittorrentOnline.SuspendLayout();
             this.groupBoxOnlineOther.SuspendLayout();
@@ -456,11 +459,14 @@
             // 
             // groupBoxOfflineOther
             // 
+            this.groupBoxOfflineOther.Controls.Add(this.textBoxU2PasskeyQueryAPI);
+            this.groupBoxOfflineOther.Controls.Add(this.labelU2PasskeyQueryAPI);
+            this.groupBoxOfflineOther.Controls.Add(this.btnU2Tracker);
             this.groupBoxOfflineOther.Controls.Add(this.btnRemoveNotExistDataFileTorrent);
             this.groupBoxOfflineOther.Controls.Add(this.buttonOther);
             this.groupBoxOfflineOther.Location = new System.Drawing.Point(8, 263);
             this.groupBoxOfflineOther.Name = "groupBoxOfflineOther";
-            this.groupBoxOfflineOther.Size = new System.Drawing.Size(583, 106);
+            this.groupBoxOfflineOther.Size = new System.Drawing.Size(583, 129);
             this.groupBoxOfflineOther.TabIndex = 3;
             this.groupBoxOfflineOther.TabStop = false;
             this.groupBoxOfflineOther.Text = "其他";
@@ -477,7 +483,7 @@
             // 
             // buttonOther
             // 
-            this.buttonOther.Location = new System.Drawing.Point(6, 48);
+            this.buttonOther.Location = new System.Drawing.Point(6, 100);
             this.buttonOther.Name = "buttonOther";
             this.buttonOther.Size = new System.Drawing.Size(571, 23);
             this.buttonOther.TabIndex = 0;
@@ -611,6 +617,32 @@
             this.tabPageµTorrentOffline.Text = "µTorrent 离线";
             this.tabPageµTorrentOffline.UseVisualStyleBackColor = true;
             // 
+            // btnU2Tracker
+            // 
+            this.btnU2Tracker.Location = new System.Drawing.Point(6, 46);
+            this.btnU2Tracker.Name = "btnU2Tracker";
+            this.btnU2Tracker.Size = new System.Drawing.Size(571, 23);
+            this.btnU2Tracker.TabIndex = 1;
+            this.btnU2Tracker.Text = "U2 Tracker 批量替换";
+            this.btnU2Tracker.UseVisualStyleBackColor = true;
+            this.btnU2Tracker.Click += new System.EventHandler(this.btnU2Tracker_Click);
+            // 
+            // labelU2PasskeyQueryAPI
+            // 
+            this.labelU2PasskeyQueryAPI.AutoSize = true;
+            this.labelU2PasskeyQueryAPI.Location = new System.Drawing.Point(6, 78);
+            this.labelU2PasskeyQueryAPI.Name = "labelU2PasskeyQueryAPI";
+            this.labelU2PasskeyQueryAPI.Size = new System.Drawing.Size(83, 12);
+            this.labelU2PasskeyQueryAPI.TabIndex = 2;
+            this.labelU2PasskeyQueryAPI.Text = "U2密钥查询API";
+            // 
+            // textBoxU2PasskeyQueryAPI
+            // 
+            this.textBoxU2PasskeyQueryAPI.Location = new System.Drawing.Point(95, 73);
+            this.textBoxU2PasskeyQueryAPI.Name = "textBoxU2PasskeyQueryAPI";
+            this.textBoxU2PasskeyQueryAPI.Size = new System.Drawing.Size(482, 21);
+            this.textBoxU2PasskeyQueryAPI.TabIndex = 3;
+            // 
             // WinForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -640,6 +672,7 @@
             this.groupBoxLogin.PerformLayout();
             this.tabPageqBittorrentOffline.ResumeLayout(false);
             this.groupBoxOfflineOther.ResumeLayout(false);
+            this.groupBoxOfflineOther.PerformLayout();
             this.groupBoxTrackers.ResumeLayout(false);
             this.groupBoxTrackers.PerformLayout();
             this.groupBoxModifyDisk.ResumeLayout(false);
@@ -699,6 +732,9 @@
         private System.Windows.Forms.RadioButton rbWindows;
         private System.Windows.Forms.RadioButton rbTransmission;
         private System.Windows.Forms.RadioButton rbqBittorrent;
+        private System.Windows.Forms.Button btnU2Tracker;
+        private System.Windows.Forms.TextBox textBoxU2PasskeyQueryAPI;
+        private System.Windows.Forms.Label labelU2PasskeyQueryAPI;
     }
 }
 

@@ -1,10 +1,14 @@
-﻿using QbtWebAPI;
+﻿using BencodeNET.Objects;
+using QbtWebAPI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
@@ -671,9 +675,9 @@ namespace MyQbt
                     if (string.IsNullOrWhiteSpace(category) && bencodeTorrent.Trackers != null)
                     {
                         bool finded = false;
-                        foreach(IList<string> trackerList in bencodeTorrent.Trackers)
+                        foreach (IList<string> trackerList in bencodeTorrent.Trackers)
                         {
-                            foreach(string strTracker in trackerList)
+                            foreach (string strTracker in trackerList)
                             {
                                 string trackerDomain = (new Uri(strTracker)).Host;
                                 if (this.domainCategoryDic.ContainsKey(trackerDomain))
@@ -983,7 +987,7 @@ namespace MyQbt
             UpdataComboxTrackFindAndReplace(replaceFrom, replaceTo);
 
             string[] files = Directory.GetFiles(
-                actionDirectory, "*.fastresume", SearchOption.AllDirectories);
+                actionDirectory, "*.fastresume", SearchOption.TopDirectoryOnly);
             var parser = new BencodeNET.Parsing.BencodeParser();
             BencodeNET.Objects.BString trackersBString =
                 new BencodeNET.Objects.BString("trackers");
@@ -1040,7 +1044,7 @@ namespace MyQbt
             UpdataComboxSavePathFindAndReplace(diskFrom, diskTo);
 
             string[] files = Directory.GetFiles(
-                actionDirectory, "*.fastresume", SearchOption.AllDirectories);
+                actionDirectory, "*.fastresume", SearchOption.TopDirectoryOnly);
             var parser = new BencodeNET.Parsing.BencodeParser();
 
             BencodeNET.Objects.BString s1BString =
@@ -1129,7 +1133,7 @@ namespace MyQbt
             if (actionDirectory == null) return;
 
             string[] files = Directory.GetFiles(
-                actionDirectory, "*.fastresume", SearchOption.AllDirectories);
+                actionDirectory, "*.fastresume", SearchOption.TopDirectoryOnly);
 
             var parser = new BencodeNET.Parsing.BencodeParser();
             //BencodeNET.Objects.BString categoryBString =
@@ -1223,7 +1227,7 @@ namespace MyQbt
             if (actionDirectory == null) return;
 
             string[] fastresumeFiles = Directory.GetFiles(
-                actionDirectory, "*.fastresume", SearchOption.AllDirectories);
+                actionDirectory, "*.fastresume", SearchOption.TopDirectoryOnly);
 
             var parser = new BencodeNET.Parsing.BencodeParser();
             BencodeNET.Objects.BString categoryBString =
@@ -1268,6 +1272,138 @@ namespace MyQbt
             }
 
             MessageBox.Show("移动完成");
+        }
+
+        private void btnU2Tracker_Click(object sender, EventArgs e)
+        {
+            string u2PasskeyQueryAPI = this.textBoxU2PasskeyQueryAPI.Text;
+
+            bool valid = !string.IsNullOrWhiteSpace(u2PasskeyQueryAPI);
+            if (valid)
+            {
+                Regex regex1 = new Regex(
+                    @"^https?://u2\.dmhy\.org/jsonrpc_torrentkey\.php\?apikey=[a-z0-9]+$",
+                    RegexOptions.IgnoreCase);
+                valid = regex1.IsMatch(u2PasskeyQueryAPI);
+            }
+            if (!valid)
+            {
+                MessageBox.Show("请输入正确的API网址", "提示");
+                return;
+            }
+
+            string actionDirectory = GetActionDirectory();
+            if (actionDirectory == null) return;
+
+            string[] files = Directory.GetFiles(
+                actionDirectory, "*.torrent", SearchOption.TopDirectoryOnly);
+            var parser = new BencodeNET.Parsing.BencodeParser();
+            BencodeNET.Objects.BString infoBString =
+                new BencodeNET.Objects.BString("info");
+            BencodeNET.Objects.BString piecesBString =
+                new BencodeNET.Objects.BString("pieces");
+            BencodeNET.Objects.BString trackersBString =
+                new BencodeNET.Objects.BString("trackers");
+
+            Regex regex2 = new Regex(
+                    @"^https?://(tracker\.dmhy\.org)|(daydream\.dmhy\.best)/announce\?secure=(.*)$",
+                    RegexOptions.IgnoreCase);
+            Dictionary<string, string> passkeyFilePathDic = new Dictionary<string, string>();
+            Dictionary<string, string> filePathTrackerDic = new Dictionary<string, string>();
+
+            foreach (string filePath in files)
+            {
+                var bencodeTorrent = parser.Parse<BencodeNET.Torrents.Torrent>(filePath);
+                if (bencodeTorrent.Trackers != null && bencodeTorrent.Trackers.Count == 1 &&
+                    bencodeTorrent.Trackers[0] != null && bencodeTorrent.Trackers[0].Count == 1)
+                {
+                    if (regex2.IsMatch(bencodeTorrent.Trackers[0][0]))
+                    {
+                        passkeyFilePathDic.Add(bencodeTorrent.OriginalInfoHash, filePath);
+                    }
+                }
+            }
+
+            int indexCount = 0;
+            int allCount = 0;
+            StringBuilder jsonStringBuilder = new StringBuilder();
+            List<string> filePathList = new List<string>();
+
+            foreach (KeyValuePair<string, string> kv in passkeyFilePathDic)
+            {
+                if (indexCount == 0)
+                {
+                    jsonStringBuilder.Clear();
+                    jsonStringBuilder.Append("[");
+                }
+
+                indexCount++;
+                allCount++;
+                filePathList.Add(kv.Value);
+                jsonStringBuilder.Append(string.Format("{{\"jsonrpc\": \"2.0\",\"method\": \"query\",\"params\": [ \"{0}\" ],\"id\": {1}}},", kv.Key, indexCount));
+                if (allCount == passkeyFilePathDic.Count || indexCount == 99)
+                {
+                    jsonStringBuilder.Remove(jsonStringBuilder.Length - 1, 1);
+                    jsonStringBuilder.Append("]");
+
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(u2PasskeyQueryAPI);
+                    request.ContentType = "application/json";
+                    request.Method = "POST";
+                    request.Timeout = 300000;
+
+                    byte[] bytes = Encoding.UTF8.GetBytes(jsonStringBuilder.ToString());
+                    request.ContentLength = bytes.Length;
+                    Stream writer = request.GetRequestStream();
+                    writer.Write(bytes, 0, bytes.Length);
+                    writer.Close();
+
+                    HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                    StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8);
+                    string result = reader.ReadToEnd();
+                    response.Close();
+
+                    string[] ss1 = result.Trim(new char[] { '{', '}', '[', ']' }).Split(new char[] { ',' });
+                    for (int i = 1; i < ss1.Length; i += 3)
+                    {
+                        string[] ss2 = ss1[i - 1].Trim(new char[] { '{', '}' }).Split(new char[] { '\"' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] ss3 = ss1[i].Trim(new char[] { '{', '}' }).Split(new char[] { '\"' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (ss2[2] == "2.0") filePathTrackerDic.Add(filePathList[(i - 1) / 3], ss3[2]);
+                    }
+
+                    indexCount = 0;
+                    filePathList.Clear();
+
+                    Thread.Sleep(5000);
+                }
+            }
+
+            int count = 0;
+            foreach (KeyValuePair<string, string> kv in filePathTrackerDic)
+            {
+                string fastresumeFilePath = kv.Key.Remove(kv.Key.Length - "torrent".Length) + "fastresume";
+                if (!File.Exists(fastresumeFilePath)) continue;
+
+                var bdic = parser.Parse<BencodeNET.Objects.BDictionary>(fastresumeFilePath);
+
+                BencodeNET.Objects.BList trackersBDic =
+                    bdic[trackersBString] as BencodeNET.Objects.BList;
+
+                if (trackersBDic != null && trackersBDic.Count == 1 && trackersBDic[0] != null)
+                {
+                    BencodeNET.Objects.BList bl = trackersBDic[0] as BencodeNET.Objects.BList;
+                    if (bl.Count == 1)
+                    {
+                        if (regex2.IsMatch(bl[0].ToString()))
+                        {
+                            bl[0] = new BString("http://daydream.dmhy.best/announce?secure=" + kv.Value);
+                            bdic.EncodeTo(fastresumeFilePath);
+                            count++;
+                        }
+                    }
+                }
+            }
+
+            MessageBox.Show(string.Format("共修改{0}个种子的Tracker", count), "提示");
         }
     }
 }
