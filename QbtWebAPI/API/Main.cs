@@ -24,6 +24,8 @@ namespace QbtWebAPI
         /// </summary>
         public static event EventHandler Disconnected;
 
+        private static string ApiVersion;
+
         /// <summary>
         /// Initializes the API.
         /// </summary>
@@ -65,6 +67,8 @@ namespace QbtWebAPI
 
             if (result == "Ok.")
             {
+                ApiVersion = await GetApiVersion();
+
                 //client.DefaultRequestHeaders.Authorization =
                 //    new System.Net.Http.Headers.AuthenticationHeaderValue(
                 //    "Basic", Convert.ToBase64String(
@@ -119,10 +123,10 @@ namespace QbtWebAPI
         /// Gets API version.
         /// </summary>
         /// <returns>API version.</returns>
-        public static async Task<int> GetApiVersion()
+        public static async Task<string> GetApiVersion()
         {
             var reply = await Post(client, "/api/v2/app/webapiVersion");
-            return Int32.Parse(await reply.Content.ReadAsStringAsync());
+            return await reply.Content.ReadAsStringAsync();
         }
 
         /// <summary>
@@ -565,7 +569,17 @@ namespace QbtWebAPI
                 form.Add(new StringContent(paused.ToString().ToLower()), "paused");
 
             if (rootFolder != null)
-                form.Add(new StringContent(rootFolder.ToString().ToLower()), "root_folder");
+            {
+                if (string.Compare(ApiVersion, "2.7") >= 0)
+                {
+                    string contentLayout = Convert.ToBoolean(rootFolder) ? "Original" : "NoSubfolder";
+                    form.Add(new StringContent(contentLayout), "contentLayout");
+                }
+                else
+                {
+                    form.Add(new StringContent(rootFolder.ToString().ToLower()), "root_folder");
+                }
+            }
 
             if (rename != null)
                 form.Add(new StringContent(rename), "rename");

@@ -1,4 +1,6 @@
 ﻿using BencodeNET.Objects;
+using BencodeNET.Parsing;
+using BencodeNET.Torrents;
 using QbtWebAPI;
 using System;
 using System.Collections.Generic;
@@ -660,11 +662,11 @@ namespace MyQbt
                     bool needTryAgain = true;
                     string errMsg = "";
 
-                    var bencodeParser = new BencodeNET.Parsing.BencodeParser();
-                    var bencodeTorrent = bencodeParser.Parse<BencodeNET.Torrents.Torrent>(torrentPath);
+                    var parser = new BencodeParser();
+                    Torrent torrent = parser.Parse<Torrent>(torrentPath);
 
-                    if (bencodeTorrent == null ||
-                        bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Unknown)
+                    if (torrent == null ||
+                        torrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Unknown)
                     {
                         failedDic.Add(torrentPath, "读取种子文件出错");
                         continue;
@@ -672,10 +674,10 @@ namespace MyQbt
 
                     string category = this.cbCategory.Text.Trim();
 
-                    if (string.IsNullOrWhiteSpace(category) && bencodeTorrent.Trackers != null)
+                    if (string.IsNullOrWhiteSpace(category) && torrent.Trackers != null)
                     {
                         bool finded = false;
-                        foreach (IList<string> trackerList in bencodeTorrent.Trackers)
+                        foreach (IList<string> trackerList in torrent.Trackers)
                         {
                             foreach (string strTracker in trackerList)
                             {
@@ -696,14 +698,14 @@ namespace MyQbt
                         try
                         {
                             string strTemp = await AddPrefixWithFileName.AddTorrent(
-                                torrentPath, bencodeTorrent, settingSaveFolder,
+                                torrentPath, torrent, settingSaveFolder,
                                 this.cbSkipHashCheck.Checked,
                                 this.cbStartTorrent.Checked, category,
                                 btClient, isWindowsPath, actualToVirtualDic, transmissionClient);
 
                             successList.Add(string.Join("|", new string[] {
-                                torrentPath, bencodeTorrent.FileMode.ToString(),
-                                bencodeTorrent.DisplayName, "False", strTemp }));
+                                torrentPath, torrent.FileMode.ToString(),
+                                torrent.DisplayName, "False", strTemp }));
                             UpdataComboxSettingSaveFolder(settingSaveFolder);
                         }
                         catch (Exception ex)
@@ -714,7 +716,7 @@ namespace MyQbt
                     else if (this.rbManual.Checked)
                     {
                         AddTorrentManual form = new AddTorrentManual(
-                            torrentPath, bencodeTorrent, settingSaveFolder,
+                            torrentPath, torrent, settingSaveFolder,
                             this.cbSkipHashCheck.Checked,
                             this.cbStartTorrent.Checked, category,
                             btClient, isWindowsPath, actualToVirtualDic,
@@ -728,8 +730,8 @@ namespace MyQbt
                         if (this.isManualAddSuccess)
                         {
                             successList.Add(string.Join("|", new string[] {
-                                torrentPath, bencodeTorrent.FileMode.ToString(),
-                                bencodeTorrent.DisplayName, "False", this.manualAddSaveFolderPath }));
+                                torrentPath, torrent.FileMode.ToString(),
+                                torrent.DisplayName, "False", this.manualAddSaveFolderPath }));
                             UpdataComboxSettingSaveFolder(settingSaveFolder);
                         }
                         else failedDic.Add(torrentPath, this.manualAddFailedReason);
@@ -740,9 +742,9 @@ namespace MyQbt
                         {
                             if (this.cbSkipHashCheck.Checked)
                             {
-                                Helper.TrySkipCheck(bencodeTorrent,
+                                Helper.TrySkipCheck(torrent,
                                     Helper.GetVirtualPath(settingSaveFolder, actualToVirtualDic),
-                                    bencodeTorrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Multi);
+                                    torrent.FileMode == BencodeNET.Torrents.TorrentFileMode.Multi);
                             }
 
                             if (btClient == Config.BTClient.qBittorrent)
@@ -755,7 +757,7 @@ namespace MyQbt
                                             new List<string>() { torrentPath }, settingSaveFolder,
                                             null, string.IsNullOrWhiteSpace(category) ? null : category,
                                             this.cbSkipHashCheck.Checked, !this.cbStartTorrent.Checked,
-                                            null, bencodeTorrent.DisplayName, null, null, null, null);
+                                            null, torrent.DisplayName, null, null, null, null);
                                         needTryAgain = false;
                                     }
                                     catch (QBTException ex)
@@ -795,8 +797,8 @@ namespace MyQbt
                             }
 
                             successList.Add(string.Join("|", new string[] {
-                                torrentPath, bencodeTorrent.FileMode.ToString(),
-                                bencodeTorrent.DisplayName, "True", settingSaveFolder }));
+                                torrentPath, torrent.FileMode.ToString(),
+                                torrent.DisplayName, "True", settingSaveFolder }));
                             UpdataComboxSettingSaveFolder(settingSaveFolder);
                         }
                         catch (Exception ex)
@@ -1215,7 +1217,8 @@ namespace MyQbt
 
         private void ButtonOther_Click(object sender, EventArgs e)
         {
-            RemoveAllCategoryTorrents();
+            //RemoveAllCategoryTorrents();
+            RemoveFileNotInTorrent();
         }
 
         private void RemoveAllCategoryTorrents()
@@ -1272,6 +1275,41 @@ namespace MyQbt
             }
 
             MessageBox.Show("移动完成");
+        }
+
+        private void RemoveFileNotInTorrent()
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                var bencodeParser = new BencodeNET.Parsing.BencodeParser();
+                var bencodeTorrent = bencodeParser.Parse<BencodeNET.Torrents.Torrent>(dlg.FileName);
+
+                if (bencodeTorrent != null &&
+                    bencodeTorrent.FileMode != BencodeNET.Torrents.TorrentFileMode.Unknown)
+                {
+                    FolderBrowserDialog folderDlg = new FolderBrowserDialog();
+                    if (folderDlg.ShowDialog() == DialogResult.OK)
+                    {
+                        StringBuilder sb = new StringBuilder();
+                        foreach (var v in bencodeTorrent.Files) sb.AppendLine(v.FileName);
+                        string fileNames = sb.ToString();
+
+                        string newFolderPath = Path.Combine(folderDlg.SelectedPath, "move");
+                        Directory.CreateDirectory(newFolderPath);
+
+                        string[] filePaths = Directory.GetFiles(folderDlg.SelectedPath, "*.*");
+                        foreach(string filePath in filePaths)
+                        {
+                            string fileName = Path.GetFileName(filePath);
+                            if (!fileNames.Contains(fileName))
+                            {
+                                File.Move(filePath, Path.Combine(newFolderPath, fileName));
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private void btnU2Tracker_Click(object sender, EventArgs e)
